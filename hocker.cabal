@@ -1,0 +1,220 @@
+name:                hocker
+version:             0.1.0.0
+synopsis:            CLI tools and library to interact with a V2 Docker Registry
+description:         Please see README.md
+homepage:            https://github.com/awakenetworks/hocker#readme
+license:             Apache-2.0
+license-file:        LICENSE
+author:              Awake networks
+maintainer:          opensource@awakenetworks.com
+copyright:           2016 Awake Networks
+category:            Web
+build-type:          Simple
+extra-source-files:  LICENSE
+cabal-version:       >=1.10
+
+library
+  ghc-options:         -Wall
+  hs-source-dirs:      src
+  exposed-modules:
+                  Lib,
+                  Types,
+                  Types.URI,
+                  Types.Hash,
+                  Types.ImageName,
+                  Types.ImageTag,
+                  Types.Exceptions,
+                  Data.Docker.Nix,
+                  Data.Docker.Nix.Lib,
+                  Data.Docker.Nix.FetchDocker,
+                  Data.Docker.Image.Types,
+                  Data.Docker.Image.AesonHelpers,
+                  Data.Docker.Image.V1.Layer,
+                  Data.Docker.Image.V1.Types,
+                  Data.Docker.Image.V1_2.Types,
+                  Network.Wreq.ErrorHandling,
+                  Network.Wreq.Docker.Registry.V2,
+                  Network.Wreq.Docker.Image.V1_2,
+                  Network.Wreq.Docker.Image.Lib
+  build-depends:
+                base                 >= 4.9 && < 5,
+                aeson                >= 0.9.0.1,
+                ansi-wl-pprint       >= 0.6.7.3,
+                lens-aeson           >= 1.0,
+                async                >= 2.0.0.0 && < 2.2,
+                exceptions           >= 0.8,
+                text                 >= 1.2,
+                directory            >= 1.2.2.0,
+                temporary            >= 1.2,
+                pureMD5              >= 2.1,
+                vector               >= 0.11,
+                optparse-generic     >= 1.1.5,
+                optparse-applicative >= 0.13,
+                aeson-pretty         >= 0.8,
+                filepath             >= 1.4,
+                deepseq              >= 1.4,
+                lens                 >= 4.0,
+                mtl                  >= 2.2,
+                transformers         >= 0.4,
+                lifted-base          >= 0.2.3.8,
+                zlib                 >= 0.6,
+                http-types           >= 0.9.1,
+                http-client          >= 0.4,
+                tar                  >= 0.5,
+                network              >= 2.6,
+                scientific           >= 0.3,
+                pooled-io            >= 0.0.2,
+                concurrentoutput     >= 0.2,
+                bytestring           >= 0.10,
+                uri-bytestring       >= 0.2,
+                unordered-containers >= 0.2,
+                containers           >= 0.5,
+                memory               >= 0.11,
+                turtle               >= 1.3,
+                cryptonite           >= 0.13,
+                foldl                >= 1.0,
+                time                 >= 1.4,
+                network-uri          >= 2.6,
+                wreq                 >= 0.4,
+                data-fix             >= 0.0.3,
+                hnix                 >= 0.3.4,
+                neat-interpolation   >= 0.3.2,
+                optional-args
+
+  default-language:    Haskell2010
+
+executable hocker-image
+  hs-source-dirs:      hocker-image
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
+  build-depends:
+                base                 >= 4.9 && < 5,
+                text                 >= 1.2,
+                lens                 >= 4.0,
+                optparse-generic     >= 1.1.5,
+                temporary            >= 1.2,
+                optparse-applicative >= 0.13,
+                filepath             >= 1.4,
+                mtl                  >= 2.2,
+                network              >= 2.6,
+                bytestring           >= 0.10,
+                optional-args,
+                hocker
+
+  default-language:    Haskell2010
+
+executable hocker-layer
+  hs-source-dirs:      hocker-layer
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
+  build-depends:
+                base                 >= 4.9 && < 5,
+                text                 >= 1.2,
+                lens                 >= 4.0,
+                optparse-generic     >= 1.1.5,
+                temporary            >= 1.2,
+                optparse-applicative >= 0.13,
+                filepath             >= 1.4,
+                mtl                  >= 2.2,
+                network              >= 2.6,
+                bytestring           >= 0.10,
+                cryptonite           >= 0.13,
+                optional-args,
+                hocker
+
+  default-language:    Haskell2010
+
+executable hocker-config
+  hs-source-dirs:      hocker-config
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
+  build-depends:
+                base                 >= 4.9 && < 5,
+                text                 >= 1.2,
+                lens                 >= 4.0,
+                optparse-generic     >= 1.1.5,
+                temporary            >= 1.2,
+                optparse-applicative >= 0.13,
+                filepath             >= 1.4,
+                mtl                  >= 2.2,
+                network              >= 2.6,
+                bytestring           >= 0.10,
+                optional-args,
+                hocker
+
+  default-language:    Haskell2010
+
+executable hocker-manifest
+  hs-source-dirs:      hocker-manifest
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
+  build-depends:
+                base                 >= 4.9 && < 5,
+                text                 >= 1.2,
+                lens                 >= 4.0,
+                optparse-generic     >= 1.1.5,
+                temporary            >= 1.2,
+                optparse-applicative >= 0.13,
+                filepath             >= 1.4,
+                mtl                  >= 2.2,
+                network              >= 2.6,
+                bytestring           >= 0.10,
+                optional-args,
+                hocker
+
+  default-language:    Haskell2010
+
+executable docker2nix
+ hs-source-dirs:      docker2nix
+ main-is:             Main.hs
+ ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
+ build-depends:
+               base                 >= 4.9 && < 5,
+               text                 >= 1.2,
+               lens                 >= 4.0,
+               optparse-generic     >= 1.1.5,
+               temporary            >= 1.2,
+               optparse-applicative >= 0.13,
+               filepath             >= 1.4,
+               mtl                  >= 2.2,
+               network              >= 2.6,
+               bytestring           >= 0.10,
+               hnix                 >= 0.3.4,
+               data-fix             >= 0.0.3,
+               optional-args,
+               hocker
+
+test-suite hocker-tests
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Main.hs
+  other-modules:
+                Tests.Data.Docker.Image.V1,
+                Tests.Data.Docker.Image.V1_2,
+                Tests.Data.Docker.Nix.FetchDocker
+  build-depends:
+                base                 >= 4.9 && < 5,
+                aeson                >= 0.9.0.1,
+                tasty                >= 0.11,
+                tasty-hunit          >= 0.9,
+                text                 >= 1.2,
+                network              >= 2.6,
+                network-uri          >= 2.6,
+                ansi-wl-pprint       >= 0.6.7.3,
+                unordered-containers >= 0.2,
+                tasty-quickcheck     >= 0.8,
+                tasty-smallcheck     >= 0.8,
+                tasty-golden         >= 2.3,
+                mtl                  >= 2.2,
+                bytestring           >= 0.10,
+                cryptonite           >= 0.13,
+                containers           >= 0.5,
+                hocker
+
+
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/awakenetworks/hocker
