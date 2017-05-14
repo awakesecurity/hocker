@@ -6,7 +6,7 @@
 -- |
 -- Module      :  Data.Docker.Nix.FetchDocker
 -- Copyright   :  (C) 2017 Awake Networks
--- License     :  AllRightsReserved
+-- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 ----------------------------------------------------------------------------
