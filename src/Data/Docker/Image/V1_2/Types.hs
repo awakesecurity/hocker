@@ -9,7 +9,7 @@
 -- |
 -- Module      :  Data.Docker.Image.V1_2.Types
 -- Copyright   :  (C) 2016 Awake Networks
--- License     :  AllRightsReserved
+-- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 --
