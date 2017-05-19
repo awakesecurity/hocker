@@ -45,7 +45,7 @@ data ProgArgs w = ProgArgs
       <?> "Write content to location"
       -- | Layer sha256 hash digest to fetch from registry
     , imageLayer  :: w ::: Hash.Digest Hash.SHA256
-      <?> "Layer to fetch, by hash digest (unprefixed by the hash algorithm identifier)"
+      <?> "Hash digest of layer to fetch"
       -- | Docker image name (includes the repository, e.g: library/debian)
     , imageName   :: ImageName
       -- | Docker image tag

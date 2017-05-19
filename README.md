@@ -6,7 +6,7 @@ Nix elegantly:
 - [`hocker-image`](./hocker-image/README.md) for fetching a docker image
 - [`hocker-layer`](./hocker-layer/README.md) for fetching a docker image's layers
 - [`hocker-config`](./hocker-config/README.md) for fetching a docker image's configuration JSON
-- [`hocker-manifest`](./hocker-manifest/README.md) for fetching docker registry image manifest
+- [`hocker-manifest`](./hocker-manifest/README.md) for fetching a docker registry image manifest
 - [`docker2nix`](./docker2nix/README.md) for generating Nix expressions calling the `fetchdocker`
   derivations, given a docker registry image manifest
   
@@ -17,21 +17,21 @@ The motivation for this tool came from a need to fetch docker image artifacts
 from a docker registry without the stock docker tooling designed to only work
 with the docker daemon.
 
-Our use-case (and the reason why this package exposes a `docker2nix` tool) was
-the need to pull our docker images into a [NixOS system's store](https://nixos.org/nix/manual/#ch-about-nix) and load
-those images from the store into the docker daemon running on that same system.
+Our use case (and the reason why this package exposes a `docker2nix` tool) is pulling
+docker images into a [NixOS system's store](https://nixos.org/nix/manual/#ch-about-nix) and 
+loading those images from the store into the docker daemon running on that same system.
 
 We desired this for two critical reasons:
-1. The docker daemon no longer required an internet connection in order to pull
-   the docker images it needed
+1. The docker daemon no longer required an internet connection in order to load
+   the docker images
 2. By virtue of fetching the docker images at build-time as opposed to run-time,
-   failures resulting in non-existent images or image tags we caught earlier
+   failures from non-existent images or image tags are caught earlier
 
 We strived to make this tool useful outside of the context of Nix and NixOS,
 therefore all of these tools are usable without Nix in the workflow.
 
 For high-level documentation of each utility, please refer to the README's in
-each project's respective directory (links are in the above list).
+their respective directories (links are in the above list).
 
 ## Quickstart
 Let's first retrieve a docker registry image manifest for the `debian:jessie`
@@ -55,6 +55,32 @@ $ hocker-manifest library/debian jessie
          "digest": "sha256:cd0a524342efac6edff500c17e625735bbe479c926439b263bbe3c8518a0849c"
       }
    ]
+}
+```
+
+Next, we can easily generate a `fetchdocker` derivation using `docker2nix`:
+
+```shell
+$ hocker-manifest library/debian jessie | docker2nix library/debian jessie
+{
+  config.docker.images.debian = pkgs.fetchdocker {
+    name = "debian";
+    registry = "https://registry-1.docker.io/v2/";
+    repository = "library";
+    imageName = "debian";
+    tag = "jessie";
+    imageConfig = pkgs.fetchDockerConfig {
+      inherit registry repository imageName tag;
+      sha256 = "1viqbygsz9547jy830f2lk2hcrxjf7gl9h1xda9ws5kap8yw50ry";
+    };
+    imageLayers = let
+      layer0 = pkgs.fetchDockerLayer {
+        inherit registry repository imageName tag;
+        layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
+        sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
+      };
+      in [ layer0 ];
+  };
 }
 ```
 

@@ -30,7 +30,7 @@ progSummary :: Data.Text.Text
 progSummary = "Fetch a docker image from a docker registry without using docker"
 
 main :: IO ()
-main = unwrapRecord progSummary >>= \OptArgs{..} -> do
+main = unwrapRecord progSummary >>= \Options{..} -> do
   let dockerRegistry = fromMaybe defaultRegistry registry
 
   auth <- mkAuth dockerRegistry imageName credentials
