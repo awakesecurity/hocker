@@ -33,7 +33,6 @@ import qualified Data.ByteString.Lazy
 import           Data.Monoid
 import           Data.Text                  (Text)
 import qualified Data.Text                  as Text
-import           Network.Wreq
 import qualified Network.Wreq               as Wreq
 import           Network.Wreq.ErrorHandling
 import qualified Options.Applicative        as Options
@@ -69,18 +68,18 @@ type Manifest        = Data.ByteString.Lazy.ByteString
 type ImageConfigJSON = Data.ByteString.Lazy.ByteString
 
 -- | Wreq response type parameterized by the lazy bytestring type.
-type RspBS          = Network.Wreq.Response Data.ByteString.Lazy.ByteString
+type RspBS           = Wreq.Response Data.ByteString.Lazy.ByteString
 
 -- | A file extension.
 type Extension       = String
 
 -- | RepoName is the part before the forward slash in a docker image
 -- name, e.g: @library@ in @library/debian@
-type RepoNamePart  = Text
+type RepoNamePart    = Text
 
 -- | ImageName is the part after the forward slash in a docker image
 -- name, e.g: @library@ in @library/debian@
-type ImageNamePart = Text
+type ImageNamePart   = Text
 
 -- | Docker image config JSON file's sha256 hash digest in Nix's
 -- base32 encoding.
@@ -88,29 +87,29 @@ type ImageNamePart = Text
 -- NB: it's very important to realize there's a significant difference
 -- between Nix's base32 encoding and the standard base32 encoding!
 -- (i.e, they're not compatible).
-type ConfigDigest = Base32Digest
+type ConfigDigest    = Base32Digest
 
 -- | Generic top-level optparse-generic CLI args data type and
 -- specification.
 --
 -- NOTE: `hocker-layer` does not use this data type because it
 -- requires an additional layer sha256 hash digest argument.
-data OptArgs w = OptArgs
+data Options w = Options
     { -- | URI for the registry, optional
-      registry :: w ::: Maybe RegistryURI
+      registry    :: w ::: Maybe RegistryURI
       <?> "URI of registry, defaults to the Docker Hub registry"
     , credentials :: Maybe Credentials
       -- | Filesystem path to write output to
-    , out      :: w ::: Maybe FilePath
+    , out         :: w ::: Maybe FilePath
       <?> "Write content to location"
       -- | Docker image name (includes the reponame, e.g: library/debian)
-    , imageName     :: ImageName
+    , imageName   :: ImageName
       -- | Docker image tag
-    , imageTag      :: ImageTag
+    , imageTag    :: ImageTag
     } deriving (Generic)
 
-instance ParseRecord (OptArgs Wrapped)
-deriving instance Show (OptArgs Unwrapped)
+instance ParseRecord (Options Wrapped)
+deriving instance Show (Options Unwrapped)
 
 -- | Hocker 'ExceptT' and 'ReaderT' transformer stack threading a
 -- 'HockerMeta' data type.

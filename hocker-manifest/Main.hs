@@ -28,7 +28,7 @@ progSummary :: Data.Text.Text
 progSummary = "Pull a docker image manifest from the registry"
 
 main :: IO ()
-main = unwrapRecord progSummary >>= \OptArgs{..} -> do
+main = unwrapRecord progSummary >>= \Options{..} -> do
   let dockerRegistry =  fromMaybe defaultRegistry registry
 
   auth     <- mkAuth dockerRegistry imageName credentials

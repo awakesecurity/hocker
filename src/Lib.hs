@@ -32,7 +32,7 @@ import           Data.Coerce
 import           Data.Monoid
 import qualified Data.Text                    as T
 import           Data.Text.Encoding           (encodeUtf8)
-import           Network.Wreq
+import qualified Network.Wreq                 as Wreq
 import           Nix.Expr                     (NExpr)
 import           Nix.Pretty
 import           System.Directory             (findExecutable)
@@ -101,9 +101,9 @@ joinURIPath pts uri@URI{..} = uri { uriPath = joinedParts }
   where
     joinedParts = C8.pack $ File.joinPath ("/":"v2":(C8.unpack uriPath):pts)
 
--- | Produce an @Options@ using @Network.Wreq.defaults@ and an @Auth@.
-opts :: Maybe Auth -> Options
-opts bAuth = Network.Wreq.defaults & Network.Wreq.auth .~ bAuth
+-- | Produce an @Wreq.Options@ using @Network.Wreq.defaults@ and an @Auth@.
+opts :: Maybe Wreq.Auth -> Wreq.Options
+opts bAuth = Wreq.defaults & Wreq.auth .~ bAuth
 
 -- | Hash a @Data.ByteString.Lazy.Char8@ using the SHA256 algorithm.
 sha256 :: C8L.ByteString -> Hash.Digest Hash.SHA256
