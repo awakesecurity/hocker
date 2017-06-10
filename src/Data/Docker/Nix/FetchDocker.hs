@@ -39,25 +39,24 @@ import           Types.Exceptions
 import           Types.ImageTag
 
 {- Example output of the pretty-printed, generated Nix expression AST.
-{
-  config.docker.images.debian = pkgs.fetchdocker {
-    name = "debian";
-    registry = "https://registry-1.docker.io/v2/";
-    repository = "library";
-    imageName = "debian";
-    tag = "latest";
-    imageConfig = pkgs.fetchDockerConfig {
-      inherit registry repository imageName tag;
-      sha256 = "1viqbygsz9547jy830f2lk2hcrxjf7gl9h1xda9ws5kap8yw50ry";
-    };
-    imageLayers = let
-      layer0 = pkgs.fetchDockerLayer {
-        inherit registry repository imageName tag;
-        layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
-        sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
-      };
-      in [ layer0 ];
+{ fetchdocker, fetchDockerConfig, fetchDockerLayer }:
+fetchdocker {
+  name = "debian";
+  registry = "https://registry-1.docker.io/v2/";
+  repository = "library";
+  imageName = "debian";
+  tag = "latest";
+  imageConfig = fetchDockerConfig {
+    inherit registry repository imageName tag;
+    sha256 = "1viqbygsz9547jy830f2lk2hcrxjf7gl9h1xda9ws5kap8yw50ry";
   };
+  imageLayers = let
+    layer0 = fetchDockerLayer {
+      inherit registry repository imageName tag;
+      layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
+      sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
+    };
+    in [ layer0 ];
 }
 -}
 
@@ -105,64 +104,58 @@ record, a config digest, and a list of layer digests.
 
 The generated AST, pretty-printed, may look similar to the following:
 @
-{
-  config.docker.images.debian = pkgs.fetchdocker {
-    name = "debian";
-    registry = "https://registry-1.docker.io/v2/";
-    repository = "library";
-    imageName = "debian";
-    tag = "latest";
-    imageConfig = pkgs.fetchDockerConfig {
-      inherit registry repository imageName tag;
-      sha256 = "1viqbygsz9547jy830f2lk2hcrxjf7gl9h1xda9ws5kap8yw50ry";
-    };
-    imageLayers = let
-      layer0 = pkgs.fetchDockerLayer {
-        inherit registry repository imageName tag;
-        layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
-        sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
-      };
-      in [ layer0 ];
+{ fetchdocker, fetchDockerConfig, fetchDockerLayer }:
+fetchdocker {
+  name = "debian";
+  registry = "https://registry-1.docker.io/v2/";
+  repository = "library";
+  imageName = "debian";
+  tag = "latest";
+  imageConfig = fetchDockerConfig {
+    inherit registry repository imageName tag;
+    sha256 = "1viqbygsz9547jy830f2lk2hcrxjf7gl9h1xda9ws5kap8yw50ry";
   };
+  imageLayers = let
+    layer0 = fetchDockerLayer {
+      inherit registry repository imageName tag;
+      layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
+      sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
+    };
+    in [ layer0 ];
 }
 @
 -}
 generateFetchDockerExpr :: HockerImageMeta -> ConfigDigest -> [(Base16Digest, Base32Digest)] -> Either HockerException NExpr
 generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
-  let fetchconfig = mkFetchDockerConfig commonInherits configDigest
-      fetchlayers =
-        mkLets
-         (mkFetchDockerLayers commonInherits layerDigests)
-         (mkList $ fmap genLayerId [0..(Prelude.length layerDigests)-1])
-
-  fetchDockerExpr <- mkFetchDocker dim fetchconfig fetchlayers
-
-  pure (Fix $ NSet [ dockerImgExpr fetchDockerExpr ])
-
-  where
-    dockerImgExpr fDockerExpr = NamedVar imgSelector fDockerExpr
-    genLayerId i = mkSym . T.pack $ "layer" <> show i
-    imgSelector  =
-        [ StaticKey "config"
-        , StaticKey "docker"
-        , StaticKey "images"
-        , StaticKey imageName
-        ]
-    commonInherits = inherit
+  let commonInherits = inherit
         [ StaticKey "registry"
         , StaticKey "repository"
         , StaticKey "imageName"
         , StaticKey "tag"
         ]
+  let genLayerId i = mkSym . T.pack $ "layer" <> show i
+  let fetchconfig = mkFetchDockerConfig commonInherits configDigest
+      fetchlayers =
+        mkLets
+         (mkFetchDockerLayers commonInherits layerDigests)
+         (mkList $ fmap genLayerId [0..(Prelude.length layerDigests)-1])
+  fetchDockerExpr <- mkFetchDocker dim fetchconfig fetchlayers
+  pure
+    (mkFunction
+      (mkParamset
+        [ ("fetchdocker",       Nothing)
+        , ("fetchDockerConfig", Nothing)
+        , ("fetchDockerLayer",  Nothing)
+        ]) fetchDockerExpr)
 
--- | Generate a @pkgs.fetchdocker { ... }@ function call and argument
+-- | Generate a @fetchdocker { ... }@ function call and argument
 -- attribute set. Please see 'generateNixExprs' documentation for an
 -- example of full output.
 mkFetchDocker :: HockerImageMeta -> NExpr -> NExpr -> Either HockerException NExpr
 mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
   registry <- Bifunctor.first mkHockerException serializedRegistry
   pure
-    (mkApp (mkPkgsAttrSelector constFetchdocker)
+    (mkApp (mkSym constFetchdocker)
      (attrsE
       [ ("name",        mkStr $ fromMaybe imageName altImageName)
       , ("registry",    mkStr registry)
@@ -180,17 +173,17 @@ mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
       HockerException (show err) Nothing Nothing
 
 
--- | Generate a @pkgs.fetchDockerConfig { ... }@ function call and
+-- | Generate a @fetchDockerConfig { ... }@ function call and
 -- argument attrset. This function takes an argument for a list of
 -- static keys to inherit from the parent attribute set; it helps
 -- reduce the noise in the output expression.
 mkFetchDockerConfig :: Binding NExpr -> Base32Digest -> NExpr
 mkFetchDockerConfig inherits (Base32Digest digest) =
-    mkApp (mkPkgsAttrSelector constFetchDockerConfig)
+    mkApp (mkSym constFetchDockerConfig)
           (Fix $ NSet [ inherits, "sha256" $= (mkStr digest) ])
 
 -- | Generate a list of Nix expression ASTs representing
--- @pkgs.fetchDockerLayer { ... }@ function calls. This function takes
+-- @fetchDockerLayer { ... }@ function calls. This function takes
 -- an argument for a list of static keys to inherit from the parent
 -- attribute set; it helps reduce the noise in the output expression.
 --
@@ -202,7 +195,7 @@ mkFetchDockerConfig inherits (Base32Digest digest) =
 -- pre-computed hash (which we have, thanks to the manifest) and the
 -- hash must be base32 encoded using @nix-hash@'s own base32
 -- encoding. The base16 encoded hash digest is needed intact in order
--- for the @pkgs.fetchDockerLayer@ builder script (which calls the
+-- for the @fetchDockerLayer@ builder script (which calls the
 -- @hocker-layer@ utility) to download the layer from a docker
 -- registry.
 mkFetchDockerLayers :: Binding NExpr -> [(Base16Digest, Base32Digest)] -> [Binding NExpr]
@@ -211,14 +204,9 @@ mkFetchDockerLayers inherits layerDigests =
   where
     mkLayerId i = T.pack $ "layer" <> show i
     mkFetchLayer (i, ((Base16Digest d16), (Base32Digest d32))) =
-      (mkLayerId i) $= mkApp (mkPkgsAttrSelector constFetchDockerLayer)
+      (mkLayerId i) $= mkApp (mkSym constFetchDockerLayer)
                              (Fix $ NSet
                                 [ inherits
                                 , "layerDigest" $= (mkStr d16) -- Required in order to perform a registry request
                                 , "sha256"      $= (mkStr d32) -- Required by Nix for fixed output derivations
                                 ])
-
--- | Generate a selector for an attribute within the @pkgs@ set; i.e
--- @pkgs.fetchDockerLayer@.
-mkPkgsAttrSelector :: T.Text -> NExpr
-mkPkgsAttrSelector k = Fix $ NSelect (mkSym "pkgs") [StaticKey k] Nothing
