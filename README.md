@@ -62,26 +62,25 @@ Next, we can easily generate a `fetchdocker` derivation using `docker2nix`:
 
 ```shell
 $ hocker-manifest library/debian jessie | docker2nix library/debian jessie
-{
-  config.docker.images.debian = pkgs.fetchdocker {
+{ fetchDockerConfig, fetchDockerLayer, fetchdocker }:
+fetchdocker {
     name = "debian";
     registry = "https://registry-1.docker.io/v2/";
     repository = "library";
     imageName = "debian";
     tag = "jessie";
-    imageConfig = pkgs.fetchDockerConfig {
+    imageConfig = fetchDockerConfig {
       inherit registry repository imageName tag;
-      sha256 = "1viqbygsz9547jy830f2lk2hcrxjf7gl9h1xda9ws5kap8yw50ry";
+      sha256 = "1rwinmvfc8jxn54y7qnj82acrc97y7xcnn22zaz67y76n4wbwjh5";
     };
     imageLayers = let
-      layer0 = pkgs.fetchDockerLayer {
+      layer0 = fetchDockerLayer {
         inherit registry repository imageName tag;
-        layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
-        sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
+        layerDigest = "cd0a524342efac6edff500c17e625735bbe479c926439b263bbe3c8518a0849c";
+        sha256 = "1744l0c8ag5y7ck9nhr6r5wy9frmaxi7xh80ypgnxb7g891m42nd";
       };
       in [ layer0 ];
-  };
-}
+  }
 ```
 
 ## Private Registries
