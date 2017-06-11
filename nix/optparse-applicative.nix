@@ -3,8 +3,8 @@
 }:
 mkDerivation {
   pname = "optparse-applicative";
-  version = "0.13.0.0";
-  sha256 = "1b0c5fdq8bd070g24vrjrwlq979r8dk8mys6aji9hy1l9pcv3inf";
+  version = "0.13.2.0";
+  sha256 = "18kcjldpzay3k3309rvb9vqrp5b1gqp0hgymynqx7x2kgv7cz0sw";
   libraryHaskellDepends = [
     ansi-wl-pprint base process transformers transformers-compat
   ];

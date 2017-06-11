@@ -23,7 +23,7 @@ newtype ImageTag = ImageTag { unImageTag :: String }
   deriving (Generic, Show)
 
 instance ParseField ImageTag where
-  parseField _ _ =
+  parseField _ _ _ =
     ImageTag <$>
       (Options.argument Options.str $
        ( Options.metavar "IMAGE-TAG"
