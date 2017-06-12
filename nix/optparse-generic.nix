@@ -3,8 +3,8 @@
 }:
 mkDerivation {
   pname = "optparse-generic";
-  version = "1.1.5";
-  sha256 = "1xg6c7h6h8q64gwskh7l4h7qn7w4y0ixf88grgk23xdficgmsyms";
+  version = "1.2.1";
+  sha256 = "1dk945dp98mwk1v4y0cky3z0ngmd29nbg6fbaaxnigcrgpbvkjml";
   libraryHaskellDepends = [
     base bytestring optparse-applicative semigroups system-filepath
     text time transformers void

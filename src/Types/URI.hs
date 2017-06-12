@@ -31,10 +31,11 @@ uriReader = Options.eitherReader parseURIArg
       over _Left show parsedURI
 
 instance ParseField (URIRef Absolute) where
-  parseField h n =
+  parseField h n s =
       (Options.option uriReader $
        ( Options.metavar "URI"
        <> foldMap (Options.long  . Text.unpack) n
+       <> foldMap Options.short s
        <> foldMap (Options.help  . Text.unpack) h
        )
       )

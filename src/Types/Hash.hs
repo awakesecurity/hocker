@@ -29,7 +29,7 @@ readSHA256 :: C8.ByteString -> Maybe (Hash.Digest Hash.SHA256)
 readSHA256 = either (const Nothing) Hash.digestFromByteString . toBytes
 
 instance ParseField (Hash.Digest Hash.SHA256) where
-  parseField h _ =
+  parseField h _ _ =
       (Options.option (Options.maybeReader (readSHA256 . C8.pack)) $
        ( Options.metavar "SHA256"
        <> Options.short 'l'

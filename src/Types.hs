@@ -156,7 +156,7 @@ data Credentials = Basic Username Password | BearerToken Text
   deriving (Show)
 
 instance ParseField Credentials where
-  parseField _ _ = (Basic <$> parseUsername <*> parsePassword) <|> (BearerToken <$> parseToken)
+  parseField _ _ _ = (Basic <$> parseUsername <*> parsePassword) <|> (BearerToken <$> parseToken)
     where
       parseUsername = Text.pack <$>
         (Options.option Options.str $
