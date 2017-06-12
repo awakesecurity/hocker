@@ -40,7 +40,7 @@ import           Types.ImageTag
 
 {- Example output of the pretty-printed, generated Nix expression AST.
 { fetchdocker, fetchDockerConfig, fetchDockerLayer }:
-fetchdocker {
+fetchdocker rec {
   name = "debian";
   registry = "https://registry-1.docker.io/v2/";
   repository = "library";
@@ -52,7 +52,7 @@ fetchdocker {
   };
   imageLayers = let
     layer0 = fetchDockerLayer {
-      inherit registry repository imageName tag;
+      inherit registry repository imageName;
       layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
       sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
     };
@@ -105,7 +105,7 @@ record, a config digest, and a list of layer digests.
 The generated AST, pretty-printed, may look similar to the following:
 @
 { fetchdocker, fetchDockerConfig, fetchDockerLayer }:
-fetchdocker {
+fetchdocker rec {
   name = "debian";
   registry = "https://registry-1.docker.io/v2/";
   repository = "library";
@@ -117,7 +117,7 @@ fetchdocker {
   };
   imageLayers = let
     layer0 = fetchDockerLayer {
-      inherit registry repository imageName tag;
+      inherit registry repository imageName;
       layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
       sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
     };
@@ -127,17 +127,16 @@ fetchdocker {
 -}
 generateFetchDockerExpr :: HockerImageMeta -> ConfigDigest -> [(Base16Digest, Base32Digest)] -> Either HockerException NExpr
 generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
-  let commonInherits = inherit
+  let commonInherits =
         [ StaticKey "registry"
         , StaticKey "repository"
         , StaticKey "imageName"
-        , StaticKey "tag"
         ]
   let genLayerId i = mkSym . T.pack $ "layer" <> show i
-  let fetchconfig = mkFetchDockerConfig commonInherits configDigest
+  let fetchconfig = mkFetchDockerConfig (inherit $ ((StaticKey "tag"):commonInherits)) configDigest
       fetchlayers =
         mkLets
-         (mkFetchDockerLayers commonInherits layerDigests)
+         (mkFetchDockerLayers (inherit commonInherits) layerDigests)
          (mkList $ fmap genLayerId [0..(Prelude.length layerDigests)-1])
   fetchDockerExpr <- mkFetchDocker dim fetchconfig fetchlayers
   pure
@@ -156,7 +155,7 @@ mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
   registry <- Bifunctor.first mkHockerException serializedRegistry
   pure
     (mkApp (mkSym constFetchdocker)
-     (attrsE
+     (recAttrsE
       [ ("name",        mkStr $ fromMaybe imageName altImageName)
       , ("registry",    mkStr registry)
       , ("repository",  mkStr imageRepo)
