@@ -39,9 +39,8 @@ import           System.Directory             (findExecutable)
 import           System.Environment           (getProgName)
 import           System.Exit                  as Exit
 import           System.FilePath.Posix        as File
-import           System.IO                    (stdout)
 import           Text.PrettyPrint.ANSI.Leijen as Text.PrettyPrint (SimpleDoc,
-                                                                   displayIO,
+                                                                   displayS,
                                                                    renderPretty)
 import           URI.ByteString
 
@@ -174,7 +173,7 @@ renderNixExpr = renderPretty 0.4 120 . prettyNix
 
 -- | Pretty print a Nix expression AST and print to stdout.
 pprintNixExpr :: NExpr -> IO ()
-pprintNixExpr = displayIO stdout . renderNixExpr
+pprintNixExpr expr = Prelude.putStrLn (displayS (renderNixExpr expr) "")
 
 -- | Given an executable's name, try to find it in the current
 -- process's PATH context.
