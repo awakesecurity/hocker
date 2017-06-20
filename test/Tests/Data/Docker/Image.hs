@@ -4,19 +4,19 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Data.Docker.Image.V1_2
+-- Module      :  Data.Docker.Image
 -- Copyright   :  (C) 2016 Awake Networks
 -- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 ----------------------------------------------------------------------------
 
-module Tests.Data.Docker.Image.V1_2 where
+module Tests.Data.Docker.Image where
 
 import           Data.Aeson
-import qualified Data.ByteString.Lazy.Char8   as C8L
-import           Data.Docker.Image.V1_2.Types
-import           Data.HashMap.Strict          as H
+import qualified Data.ByteString.Lazy.Char8 as C8L
+import           Data.Docker.Image.Types
+import           Data.HashMap.Strict        as H
 import           Test.Tasty
 import           Test.Tasty.HUnit
 

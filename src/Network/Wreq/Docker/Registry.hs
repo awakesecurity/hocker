@@ -9,7 +9,7 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Network.Wreq.Docker.Registry.V2
+-- Module      :  Network.Wreq.Docker.Registry
 -- Copyright   :  (C) 2016 Awake Networks
 -- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
@@ -22,7 +22,7 @@
 -- software is "docker distribution".
 ----------------------------------------------------------------------------
 
-module Network.Wreq.Docker.Registry.V2 where
+module Network.Wreq.Docker.Registry where
 
 import           Control.Lens
 import qualified Control.Monad.Except       as Except
@@ -39,14 +39,14 @@ import qualified Data.Text                  as Text
 import qualified Network.Wreq               as Wreq
 import           System.Directory
 
-import           Data.Docker.Image.V1.Types
+import           Data.Docker.Image.Types
 import           Lib
 import           Types
 import           Types.Exceptions
 import           Types.ImageName
 import           Types.ImageTag
 
--- | Default docker hub registry.
+-- | Default docker hub registry (@https://registry-1.docker.io/v2/@).
 defaultRegistry :: URIRef Absolute
 defaultRegistry = URI
   { uriScheme = Scheme "https"
@@ -60,9 +60,22 @@ defaultRegistry = URI
   , uriFragment = Nothing
   }
 
-mkAuth :: RegistryURI
-       -> ImageName
-       -> Maybe Credentials
+-- | Given 'Credentials', produce a 'Wreq.Auth'.
+--
+-- If 'Credentials' is either 'BearerToken' or 'Basic' then produce a
+-- 'Wreq.Auth' value for that type of credential.
+-- 
+-- If @Nothing@ is provided _and_ the provided 'RegistryURI' matches
+-- the default registry, make a request to
+-- @https://auth.docker.io/token@ for a temporary pull-only bearer
+-- token, assuming the request we want to make is to the public docker
+-- hub and without any other credentials.
+--
+-- Otherwise, return 'Nothing' so that an unauthenticated request can
+-- be made.
+mkAuth :: RegistryURI       -- ^ Docker registry
+       -> ImageName         -- ^ Docker image name
+       -> Maybe Credentials -- ^ Docker registry authentication credentials
        -> IO (Maybe Wreq.Auth)
 mkAuth reg (ImageName img) credentials =
   case credentials of
@@ -78,21 +91,22 @@ mkAuth reg (ImageName img) credentials =
     getHubToken     = Wreq.get ("https://auth.docker.io/token?service=registry.docker.io&scope=repository:"<>img<>":pull")
     mkHubBearer rsp = (Wreq.oauth2Bearer . encodeUtf8) <$> (rsp ^? Wreq.responseBody . key "token" . _String)
 
--- | Retrieve a list of layer hash digests from an image's manifest
--- JSON.
+-- | Retrieve a list of layer hash digests from a docker registry
+-- image manifest JSON.
 --
 -- TODO: pluck out the layer's size and digest into a tuple.
 pluckLayersFrom :: Manifest -> [Layer]
 pluckLayersFrom = toListOf (key "layers" . values . key "digest" . _String)
 
--- | Retrieve a list of layer hash digests from an image's config
--- JSON.
+-- | Retrieve a list of layer hash digests from an image's
+-- configuration JSON.
 --
--- This is subtly different from @pluckLayersFrom@ because both list
+-- This is subtly different from 'pluckLayersFrom' because both list
 -- hash digests for the image's layers but the manifest's layer hash
--- digests are keys into the registry's blob storage referencing the
--- *compressed* layer archive. The config JSON's layer hash digests
--- reference the uncompressed layer tar archives within the image.
+-- digests are keys into the registry's blob storage referencing
+-- _compressed_ layer archives. The configuration JSON's layer hash
+-- digests reference the uncompressed layer tar archives within the
+-- image.
 pluckRefLayersFrom :: ImageConfigJSON -> [Layer]
 pluckRefLayersFrom = toListOf (key "rootfs" . key "diff_ids" . values . _String)
 
@@ -110,8 +124,8 @@ fetchManifest = ask >>= \HockerMeta{..} ->
       , "application/vnd.docker.distribution.manifest.list.v2+json"
       ]
 
--- | Retrieve the config json of an image by its hash digest (found in
--- the V2 manifest for an image given by a name and tag).
+-- | Retrieve the configuratino JSON of an image by its hash digest
+-- (found in the V2 manifest for an image given by a name and a tag).
 fetchImageConfig :: (Hash.Digest Hash.SHA256) -> Hocker RspBS
 fetchImageConfig (showSHA -> digest) = ask >>= \HockerMeta{..} ->
   liftIO $ Wreq.getWith (opts auth) (mkURL imageName dockerRegistry)
@@ -132,33 +146,32 @@ fetchLayer layer = ask >>= \HockerMeta{..} ->
       registry
       = C8.unpack (serializeURIRef' $ joinURIPath [name, "blobs", digest] registry)
 
--- | Write a @Wreq@ response body to the specified @FilePath@,
--- checking the integrity of the file with its sha256 hash digest.
+-- | Write a 'Wreq.responseBody' to the specified 'FilePath', checking
+-- the integrity of the file with its sha256 hash digest.
 --
--- The second argument, the @StrippedDigest@, must be a hash digest
--- stripped of the "sha256:" hash algorithm identifier prefix.
+-- The second argument, the 'StrippedDigest', must be a hash digest
+-- stripped of the @sha256:@ algorithm identifier prefix.
 writeRespBody :: FilePath       -- ^ Filesystem path to write the content to
-              -> StrippedDigest -- ^ Hash digest, stripped of its hash algorithm identifier prefix
-              -> RspBS         -- ^ Wreq lazy bytestring response object
+              -> StrippedDigest -- ^ Hash digest, stripped of its algorithm identifier prefix
+              -> RspBS          -- ^ Wreq lazy bytestring response object
               -> Hocker FilePath
 writeRespBody out digest resp = do
   liftIO . C8L.writeFile out $ resp ^. Wreq.responseBody
-
-  -- Now, verify the file; we assume the sha256 function since that is
-  -- used everywhere
-  verified <- liftIO $ checkFileIntegrity out digest
+  verified <- liftIO (checkFileIntegrity out digest)
   either (Except.throwError . hockerException) return verified
 
 -- | Write a response to the filesystem without a request hash
--- digest. Attempt to fetch the value of the `ETag` header to verify
+-- digest. Attempt to fetch the value of the @ETag@ header to verify
 -- the integrity of the content received.
 --
--- The Docker docs do *not* recommended this method for verification
--- because the ETag and Docker-Content-Digest headers may change
+-- The Docker docs do _not_ recommended this method for verification
+-- because the @ETag@ and @Docker-Content-Digest@ headers may change
 -- between the time you issue a request with a digest and when you
 -- receive a response back!
+--
+-- We do it anyway and leave this warning.
 writeRespBody' :: FilePath  -- ^ Filesystem path to write the content to
-               -> RspBS    -- ^ Wreq lazy bytestring response object
+               -> RspBS     -- ^ Wreq lazy bytestring response object
                -> Hocker FilePath
 writeRespBody' out r = writeRespBody out etagHash r
   where
@@ -224,8 +237,7 @@ checkFileIntegrity fp digest =
           fpTxt = Text.pack fp
       in fail $ Text.unpack
         ([text|
-           The sha256 hash for $fpTxt: $fhTxt
-           Does not match the expected digest: $digest
-          |])
-
+The sha256 hash for $fpTxt: $fhTxt
+Does not match the expected digest: $digest
+|])
     return fp

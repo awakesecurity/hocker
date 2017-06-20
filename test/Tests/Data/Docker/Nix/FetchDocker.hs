@@ -13,22 +13,22 @@
 
 module Tests.Data.Docker.Nix.FetchDocker where
 
-import           Control.Exception               as CE
-import           Control.Monad.Except            as Except
-import           Data.ByteString.Lazy.Char8      as C8L
-import           Data.Either                     (either)
-import qualified Data.Text                       as T
+import           Control.Exception            as CE
+import           Control.Monad.Except         as Except
+import           Data.ByteString.Lazy.Char8   as C8L
+import           Data.Either                  (either)
+import qualified Data.Text                    as Text
 import           Network.URI
 import           Test.Tasty
 import           Test.Tasty.Golden
 import           Test.Tasty.HUnit
-import           Text.PrettyPrint.ANSI.Leijen    as Text.PrettyPrint (displayS)
+import           Text.PrettyPrint.ANSI.Leijen as Text.PrettyPrint (displayS)
 
 import           Data.Docker.Image.Types
-import           Data.Docker.Nix.FetchDocker     as Nix.FetchDocker
-import           Data.Docker.Nix.Lib             as Nix.Lib
+import           Data.Docker.Nix.FetchDocker  as Nix.FetchDocker
+import           Data.Docker.Nix.Lib          as Nix.Lib
 import           Lib
-import           Network.Wreq.Docker.Registry.V2 as Docker.Registry
+import           Network.Wreq.Docker.Registry as Docker.Registry
 import           Types
 import           Types.ImageTag
 
@@ -68,6 +68,6 @@ generateFetchDockerNix = do
       }
 
   either
-    (Lib.die . T.pack . show)
+    (Lib.die . Text.pack . show)
     (return . C8L.pack . (flip displayS "") . Lib.renderNixExpr)
     nixExpression

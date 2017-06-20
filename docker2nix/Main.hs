@@ -21,16 +21,16 @@
 
 module Main where
 
-import           Data.ByteString.Lazy.Char8      as C8L
-import           Data.Maybe                      (fromMaybe)
-import qualified Data.Text                       as T
+import           Data.ByteString.Lazy.Char8   as C8L
+import           Data.Maybe                   (fromMaybe)
+import           Data.Text                    (Text)
 import           Options.Generic
-import           System.IO                       (hWaitForInput, stdin)
+import           System.IO                    (hWaitForInput, stdin)
 
 import           Data.Docker.Image.Types
-import           Data.Docker.Nix.FetchDocker     as Nix.FetchDocker
+import           Data.Docker.Nix.FetchDocker  as Nix.FetchDocker
 import           Lib
-import           Network.Wreq.Docker.Registry.V2 as Docker.Registry
+import           Network.Wreq.Docker.Registry as Docker.Registry
 import           Types
 import           Types.ImageName
 import           Types.ImageTag
@@ -45,7 +45,7 @@ data ProgArgs w = ProgArgs
       <?> "Fetch image manifest from a path on the filesystem"
       -- | Alternative docker image name made available in the Nix
       -- expression fetchdocker derivation
-    , altImageName :: w ::: Maybe T.Text
+    , altImageName :: w ::: Maybe Text
       <?> "Alternate image name provided in the `fetcdocker` derivation"
       -- | Docker image name (includes the reponame, e.g: library/debian)
     , name    :: ImageName
@@ -57,12 +57,12 @@ data ProgArgs w = ProgArgs
 instance ParseRecord (ProgArgs Wrapped)
 deriving instance Show (ProgArgs Unwrapped)
 
-progSummary :: T.Text
+progSummary :: Text
 progSummary = "Produce a Nix expression given a manifest for a docker image via stdin or via a filepath"
 
 main :: IO ()
 main = unwrapRecord progSummary >>= \ProgArgs{..} -> do
-  let (imageRepo, imageName) = Lib.splitImgName name
+  let (imageRepo, imageName) = Lib.splitRepository name
       dockerRegistry         = fromMaybe defaultRegistry registry
 
   manifestJSON <-

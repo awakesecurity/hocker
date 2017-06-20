@@ -31,16 +31,16 @@ import qualified System.Directory                  as Directory
 import           System.FilePath.Posix             as File
 import           System.Terminal.Concurrent
 
-import           Data.Docker.Image.V1_2.Types
+import           Data.Docker.Image.Types
 import           Lib
-import           Network.Wreq.Docker.Registry.V2   as Docker.Registry
+import           Network.Wreq.Docker.Registry      as Docker.Registry
 import           Types
 import           Types.Exceptions
 import           Types.ImageTag
 
--- | Like @mapM@ but concurrently applies a function to the elements
--- of the @Traversable@, limiting the maximum number of worker threads
--- by *n*.
+-- | Like @mapM@ but concurrently apply a function to the elements of
+-- the @Traversable@, limiting the maximum number of worker threads by
+-- _n_.
 mapPool :: Traversable t
         => Int                                         -- ^ Number of pooled worker threads
         -> ((String -> IO ()) -> a -> Hocker FilePath) -- ^ Processing function
@@ -69,7 +69,7 @@ forPool n = flip $ mapPool n
 -- | Download, verify, decompress, and write a docker container image
 -- layer to the filesystem.
 fetchLayer :: (String -> IO ()) -- ^ Concurrent terminal output function
-           -> (RefLayer, Layer) -- ^ A tuple of the reference layer hash digest from the image's config JSON and the hash digest from the image's manifest JSON
+           -> (RefLayer, Layer) -- ^ A tuple of the reference layer hash digest from the image's config JSON and hash digest from the image's manifest JSON
            -> Hocker FilePath
 fetchLayer writeC layer@(refl, (stripHashId -> layer')) = ask >>= \HockerMeta{..} -> do
   liftIO . writeC . Text.unpack $ "Downloading layer: " <> (Text.take 7 layer')
@@ -79,7 +79,7 @@ fetchLayer writeC layer@(refl, (stripHashId -> layer')) = ask >>= \HockerMeta{..
   let decompressed = fetchedImageLayer & Wreq.responseBody %~ GZip.decompress
       shortRef     = Text.take 7 refl
 
-  imageOutDir <- Lib.requireOutPath outDir
+  imageOutDir <- Lib.requirePath outDir
 
   liftIO $ writeC " => decompressed "
 
@@ -101,14 +101,14 @@ createImageManifest repoTag imageConfigFile refls = ask >>= \HockerMeta{..} -> d
           (takeBaseName imageConfigFile `addExtension` "json")
           [Text.pack (repoTag ++ ":" ++ coerce imageTag)]
           (fmap ((`addExtension` "tar") . Text.unpack) refls) ]
-  imageOutDir <- Lib.requireOutPath outDir
+  imageOutDir <- Lib.requirePath outDir
   liftIO $ C8L.writeFile
     (imageOutDir </> "manifest" `addExtension` "json")
     (Lib.encodeCanonical imageManifest)
 
 -- | Generate a @repositories@ json file.
 --
--- NB: it is JSON but Docker doesn't want it with a JSON extension
+-- NB: it is JSON but Docker doesn't want it a @.json@ extension
 -- unlike its sibling the @manifest.json@ file.
 createImageRepository :: RepoTag    -- ^ e.g: registry.mydomain.net:5001/reponame/imagename
                       -> [RefLayer] -- ^ Layer hash digests sourced from the image's configuration JSON
@@ -125,7 +125,7 @@ createImageRepository repoTag refls = ask >>= \HockerMeta{..} -> do
           (HashMap.singleton
            (Text.pack $ coerce imageTag)
            ((Prelude.last refls) <> ".tar"))
-  imageOutDir <- Lib.requireOutPath outDir
+  imageOutDir <- Lib.requirePath outDir
   liftIO $ C8L.writeFile
     (imageOutDir </> "repositories")
     (Lib.encodeCanonical repositories)
@@ -134,8 +134,8 @@ createImageRepository repoTag refls = ask >>= \HockerMeta{..} -> do
 -- and remove the output dir.
 createImageTar :: Hocker FilePath
 createImageTar = ask >>= \HockerMeta{..} -> do
-  imageOutDir <- Lib.requireOutPath outDir
-  archivePath <- Lib.requireOutPath out
+  imageOutDir <- Lib.requirePath outDir
+  archivePath <- Lib.requirePath out
 
   entries <- liftIO $ Directory.getDirectoryContents imageOutDir
 

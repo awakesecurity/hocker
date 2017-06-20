@@ -15,15 +15,15 @@
 
 module Main where
 
-import           Data.Maybe                      (fromMaybe)
+import           Data.Maybe                   (fromMaybe)
 import qualified Data.Text
-import           Data.Text.IO                    as TIO
+import           Data.Text.IO                 as TIO
 import           Options.Generic
-import           System.IO.Temp                  as Tmp
+import           System.IO.Temp               as Tmp
 
 import           Lib
-import           Network.Wreq.Docker.Image.V1_2  as Docker.Image
-import           Network.Wreq.Docker.Registry.V2
+import           Network.Wreq.Docker.Image    as Docker.Image
+import           Network.Wreq.Docker.Registry
 import           Types
 
 progSummary :: Data.Text.Text
@@ -35,7 +35,7 @@ main = unwrapRecord progSummary >>= \Options{..} -> do
 
   auth <- mkAuth dockerRegistry imageName credentials
   img  <- withSystemTempDirectory "hocker-image-XXXXXX" $ \d ->
-    Docker.Image.fetchAndAssemble $
+    Docker.Image.fetchImage $
       HockerMeta
         { outDir     = Just d
         , imageLayer = Nothing
