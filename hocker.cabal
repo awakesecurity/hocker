@@ -12,7 +12,7 @@ category:            Utilities
 build-type:          Simple
 extra-source-files:  LICENSE
 cabal-version:       >=1.10
-Tested-With:         GHC == 7.10.2, GHC == 8.0.1
+Tested-With:         GHC == 8.0.1
 Description:
     @hocker@ is a suite of command line utilities and a library for:
     .
