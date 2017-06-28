@@ -101,21 +101,3 @@ also do not supply a `--registry` flag then the tools assume you wish to make a
 request to the public docker hub registry, in which case they ask for a
 short-lived authentication token from the registry auth server and then make the
 request to the public docker hub registry.
-
-# TODO
-- [X] ~Get a nix-build workflow working for hocker~
-- [ ] Work on a nix-shell based dev workflow
-- [ ] Document types in `Exceptions`, `ErrorHandling`, etc.
-- [x] ~Rename the `Types/Extra.hs` module, that's poorly named~ (I got rid of it)
-- [x] ~Write an updated and accurate README introduction~
-- [X] Rename `ContainerName` and `ContainerTag` to `ImageName` and `ImageTag` to
-  be more consistent with the correct docker terminology
-- [x] ~Remove the run prefix from most of the `V1_2.hs` module functions~ (replaced with a `do` prefix)
-- [X] ~Use HockerException in docker2nix's lib functions~
-- [x] ~Better document the types and function signatures in `Nix/FetchDocker.hs`~
-- [X] L258 fix docker-layer to hocker-layer
-- [ ] Proofread comments
-- [ ] `Data/Docker/Image/Types.hs` can probably move to a more general location
-  I think
-- [ ] Use friendly module prefixing more consistently and cleanup usage
-- [ ] Strip out the unused docker image V1 code

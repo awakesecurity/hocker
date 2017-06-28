@@ -15,43 +15,48 @@
 
 module Data.Docker.Nix.Lib where
 
-import           Control.Foldl                   as Foldl
+import           Control.Foldl        as Foldl
 import           Turtle
 import           Control.Monad.Except as Except
-import qualified Data.Text                       as T
+import qualified Data.Text            as Text
 
 import           Types
 import           Types.Exceptions
 
--- | Convert a @Base16Digest@ to a @Base32Digest@ using the supplied
--- `nix-hash` utility.
+-- | Convert a 'Base16Digest' to a 'Base32Digest' using the @nix-hash@
+-- utility.
 --
 -- NB: Nix implements its own custom base32 encoding function for
 -- hashes that is not compatible with other more standard and native
--- implementations in Haskell. I opted to call out to `nix-hash`
--- instead of re-implementing their algorithm here in Haskell because
--- it's non-standard and may change, creating a maintenance headache
--- and "surprise" behavior for users.
+-- implementations in Haskell. I opted to call out to @nix-hash@
+-- instead of re-implementing their algorithm because it's
+-- non-standard and may change, creating a maintenance headache and
+-- surprise behavior.
 toBase32Nix :: (MonadIO m, Except.MonadError HockerException m)
-            => Prelude.FilePath -- ^ Path to the `nix-hash` executable, see @Lib.findExec@.
-            -> Base16Digest     -- ^ @Base16@ hash digest to @Base32@ encode.
+            => Prelude.FilePath -- ^ Path to the @nix-hash@ executable, see 'Lib.findExec'
+            -> Base16Digest     -- ^ 'Base16Digest' to @base32@ encode
             -> m Base32Digest
-toBase32Nix nixhash (Base16Digest d16) =
+toBase32Nix nixhash (Base16Digest d16) = do
+  let hockerExc m   = HockerException m Nothing Nothing
+  let convertDigest =
+        inprocWithErr
+          (Text.pack nixhash)
+          [ "--type"
+          , "sha256"
+          , "--to-base32"
+          , d16
+          ]
+          Turtle.empty
+
   Turtle.fold convertDigest Foldl.head >>= \case
-    Nothing     -> throwError $ HockerException "nothing was returned by `nix-hash', not even an error" Nothing Nothing
+    Nothing     ->
+      throwError
+        (HockerException
+           "nothing was returned by `nix-hash', not even an error"
+           Nothing
+            Nothing)
     Just result ->
       either
-       (throwError . hockerExc . T.unpack . lineToText)
+       (throwError . hockerExc . Text.unpack . lineToText)
        (return . Base32Digest . lineToText)
        result
-  where
-    hockerExc m   = HockerException m Nothing Nothing
-    convertDigest =
-      inprocWithErr
-        (T.pack nixhash)
-        [ "--type"
-        , "sha256"
-        , "--to-base32"
-        , d16
-        ]
-        Turtle.empty

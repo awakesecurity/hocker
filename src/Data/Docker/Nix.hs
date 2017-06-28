@@ -11,11 +11,11 @@
 -- Stability   :  stable
 --
 -- This module only re-exports Nix modules providing Docker-specific
--- functionality as it pertains to Nix.
+-- functionality as it pertains to generation of Nix expression.
 ----------------------------------------------------------------------------
 
 module Data.Docker.Nix
-( -- * Generating `fetchdocker` Nix Derivation Expressions
+( -- * Generate nix build instructions for a docker image
   module Data.Docker.Nix.FetchDocker
 ) where
 

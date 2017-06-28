@@ -30,6 +30,7 @@ import qualified Control.Monad.Reader       as Reader
 import           Control.Monad.Reader.Class
 import qualified Crypto.Hash                as Hash
 import qualified Data.ByteString.Lazy
+import           Data.Char                  (toUpper)
 import           Data.Monoid
 import           Data.Text                  (Text)
 import qualified Data.Text                  as Text
@@ -186,3 +187,8 @@ instance ParseField Credentials where
 instance ParseFields Credentials
 instance ParseRecord Credentials where
   parseRecord = fmap Options.Generic.getOnly parseRecord
+
+-- | @upperFirst@ uppercases the first letter of the string.
+upperFirst :: String -> String
+upperFirst []    = []
+upperFirst (h:t) = toUpper h : t

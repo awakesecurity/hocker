@@ -1,17 +1,39 @@
 name:                hocker
-version:             0.1.0.0
-synopsis:            CLI tools and library to interact with a V2 Docker Registry
-description:         Please see README.md
+version:             1.0.0
+synopsis:            Utilities for interacting with the docker registry and generating nix build instructions
 homepage:            https://github.com/awakenetworks/hocker#readme
+Bug-Reports:         https://github.com/awakenetworks/hocker/issues
 license:             Apache-2.0
 license-file:        LICENSE
 author:              Awake networks
 maintainer:          opensource@awakenetworks.com
 copyright:           2016 Awake Networks
-category:            Web
+category:            Utilities
 build-type:          Simple
 extra-source-files:  LICENSE
 cabal-version:       >=1.10
+Tested-With:         GHC == 8.0.1
+Description:
+    @hocker@ is a suite of command line utilities and a library for:
+    .
+    * fetching a docker image
+    * fetching a layer of an image
+    * fetching an image's configuration
+    * fetching a docker registry image manifest
+    * generating nix build instructions from a registry image manifest
+    .
+    The motivation for this tool came from a need to fetch docker
+    image artifacts from a docker registry without the stock docker
+    tooling that is designed to only work with the docker daemon.
+    .
+    These tools /only/ work with version 2 of the docker registry and
+    docker version (>=) 1.10.
+    .
+    For a complete set of usage examples please see the project's <https://github.com/awakenetworks/hocker#readme README.md>.
+
+source-repository head
+  type:     git
+  location: https://github.com/awakenetworks/hocker
 
 library
   ghc-options:         -Wall
@@ -29,12 +51,9 @@ library
                   Data.Docker.Nix.FetchDocker,
                   Data.Docker.Image.Types,
                   Data.Docker.Image.AesonHelpers,
-                  Data.Docker.Image.V1.Layer,
-                  Data.Docker.Image.V1.Types,
-                  Data.Docker.Image.V1_2.Types,
                   Network.Wreq.ErrorHandling,
-                  Network.Wreq.Docker.Registry.V2,
-                  Network.Wreq.Docker.Image.V1_2,
+                  Network.Wreq.Docker.Registry,
+                  Network.Wreq.Docker.Image,
                   Network.Wreq.Docker.Image.Lib
   build-depends:
                 base                 >= 4.9 && < 5,
@@ -189,8 +208,7 @@ test-suite hocker-tests
   hs-source-dirs:      test
   main-is:             Main.hs
   other-modules:
-                Tests.Data.Docker.Image.V1,
-                Tests.Data.Docker.Image.V1_2,
+                Tests.Data.Docker.Image,
                 Tests.Data.Docker.Nix.FetchDocker
   build-depends:
                 base                 >= 4.9 && < 5,
@@ -214,7 +232,3 @@ test-suite hocker-tests
 
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
-
-source-repository head
-  type:     git
-  location: https://github.com/awakenetworks/hocker

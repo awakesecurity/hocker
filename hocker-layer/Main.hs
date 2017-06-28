@@ -21,19 +21,19 @@
 
 module Main where
 
-import qualified Crypto.Hash                     as Hash
-import           Data.Maybe                      (fromMaybe)
+import qualified Crypto.Hash                  as Hash
+import           Data.Maybe                   (fromMaybe)
 import qualified Data.Text
 import           Options.Generic
 
 import           Lib
-import           Network.Wreq.Docker.Image.V1_2  as Docker.Image
-import           Network.Wreq.Docker.Registry.V2
+import           Network.Wreq.Docker.Image    as Docker.Image
+import           Network.Wreq.Docker.Registry
 import           Types
-import           Types.Hash                      ()
+import           Types.Hash                   ()
 import           Types.ImageName
 import           Types.ImageTag
-import           Types.URI                       ()
+import           Types.URI                    ()
 
 data ProgArgs w = ProgArgs
     { -- | URI for the registry, optional

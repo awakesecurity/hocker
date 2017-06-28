@@ -17,23 +17,24 @@ module Data.Docker.Nix.FetchDocker where
 
 import           Control.Lens
 import           Control.Monad
-import           Control.Monad.Except            as Except
+import           Control.Monad.Except         as Except
 import           Data.Aeson.Lens
-import qualified Data.Bifunctor                  as Bifunctor
+import qualified Data.Bifunctor               as Bifunctor
 import           Data.Coerce
 import           Data.Fix
 import           Data.Maybe
 import           Data.Monoid
-import qualified Data.Text                       as T
-import           Data.Text.Encoding              (decodeUtf8')
+import           Data.Text                    (Text)
+import qualified Data.Text                    as Text
+import           Data.Text.Encoding           (decodeUtf8')
 import           Data.Text.Encoding.Error
 import           Nix.Expr
 import           URI.ByteString
 
 import           Data.Docker.Image.Types
-import           Data.Docker.Nix.Lib             as Nix.Lib
+import           Data.Docker.Nix.Lib          as Nix.Lib
 import           Lib
-import           Network.Wreq.Docker.Registry.V2 (pluckLayersFrom)
+import           Network.Wreq.Docker.Registry (pluckLayersFrom)
 import           Types
 import           Types.Exceptions
 import           Types.ImageTag
@@ -60,22 +61,24 @@ fetchdocker rec {
 }
 -}
 
--- | @fetchdocker@ derivation name.
-constFetchdocker :: T.Text
+-- | @fetchdocker@ function name.
+constFetchdocker :: Text
 constFetchdocker       = "fetchdocker"
 
--- | @fetchDockerConfig@ derivation name.
-constFetchDockerConfig :: T.Text
+-- | @fetchDockerConfig@ function name.
+constFetchDockerConfig :: Text
 constFetchDockerConfig = "fetchDockerConfig"
 
--- | @fetchDockerLayer@ derivation name.
-constFetchDockerLayer :: T.Text
+-- | @fetchDockerLayer@ function name.
+constFetchDockerLayer :: Text
 constFetchDockerLayer  = "fetchDockerLayer"
 
 -- | Generate a Nix expression AST from a @HockerImageMeta@
--- record. This function crucially checks that the supplied manifest
--- JSON contains a key in the top-level object describing what version
--- of the manifest we have.
+-- record.
+--
+-- This function checks that the supplied manifest JSON contains a key
+-- in the top-level object describing what version of the manifest we
+-- have.
 generate :: HockerImageMeta -> IO (Either HockerException NExpr)
 generate dim@HockerImageMeta{..} = runExceptT $
   case (manifestJSON ^? key "schemaVersion" . _Integer) of
@@ -87,7 +90,7 @@ generate dim@HockerImageMeta{..} = runExceptT $
 
       ExceptT (pure $ generateFetchDockerExpr dim configDigest layerDigests)
     Just v  ->
-      throwError $ HockerException ("Expected: 2 but got: " <> (show v)) Nothing Nothing
+      throwError $ HockerException ("Expected a version 2 manifest but got version " <> (show v)) Nothing Nothing
     Nothing ->
       throwError $ HockerException "No key 'schemaVersion' in JSON object" Nothing Nothing
 
@@ -102,28 +105,27 @@ generate dim@HockerImageMeta{..} = runExceptT $
 {-| Generate a top-level Nix Expression AST from a 'HockerImageMeta'
 record, a config digest, and a list of layer digests.
 
-The generated AST, pretty-printed, may look similar to the following:
-@
-{ fetchdocker, fetchDockerConfig, fetchDockerLayer }:
-fetchdocker rec {
-  name = "debian";
-  registry = "https://registry-1.docker.io/v2/";
-  repository = "library";
-  imageName = "debian";
-  tag = "latest";
-  imageConfig = fetchDockerConfig {
-    inherit registry repository imageName tag;
-    sha256 = "1viqbygsz9547jy830f2lk2hcrxjf7gl9h1xda9ws5kap8yw50ry";
-  };
-  imageLayers = let
-    layer0 = fetchDockerLayer {
-      inherit registry repository imageName;
-      layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
-      sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
-    };
-    in [ layer0 ];
-}
-@
+The generated AST, pretty printed, may look similar to the following:
+
+> { fetchdocker, fetchDockerConfig, fetchDockerLayer }:
+> fetchdocker rec {
+>   name = "debian";
+>   registry = "https://registry-1.docker.io/v2/";
+>   repository = "library";
+>   imageName = "debian";
+>   tag = "latest";
+>   imageConfig = fetchDockerConfig {
+>     inherit registry repository imageName tag;
+>     sha256 = "1viqbygsz9547jy830f2lk2hcrxjf7gl9h1xda9ws5kap8yw50ry";
+>   };
+>   imageLayers = let
+>     layer0 = fetchDockerLayer {
+>       inherit registry repository imageName;
+>       layerDigest = "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9";
+>       sha256 = "1fcmx3aklbr24qsjhm6cvmhqhmrxr6xlpq75mzrk0dj2gz36g8hh";
+>     };
+>     in [ layer0 ];
+> }
 -}
 generateFetchDockerExpr :: HockerImageMeta -> ConfigDigest -> [(Base16Digest, Base32Digest)] -> Either HockerException NExpr
 generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
@@ -132,7 +134,7 @@ generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
         , StaticKey "repository"
         , StaticKey "imageName"
         ]
-  let genLayerId i = mkSym . T.pack $ "layer" <> show i
+  let genLayerId i = mkSym . Text.pack $ "layer" <> show i
   let fetchconfig = mkFetchDockerConfig (inherit $ ((StaticKey "tag"):commonInherits)) configDigest
       fetchlayers =
         mkLets
@@ -148,8 +150,8 @@ generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
         ]) fetchDockerExpr)
 
 -- | Generate a @fetchdocker { ... }@ function call and argument
--- attribute set. Please see 'generateNixExprs' documentation for an
--- example of full output.
+-- attribute set. Please see 'generateFetchDockerExpr' documentation
+-- for an example of full output.
 mkFetchDocker :: HockerImageMeta -> NExpr -> NExpr -> Either HockerException NExpr
 mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
   registry <- Bifunctor.first mkHockerException serializedRegistry
@@ -160,7 +162,7 @@ mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
       , ("registry",    mkStr registry)
       , ("repository",  mkStr imageRepo)
       , ("imageName",   mkStr imageName)
-      , ("tag",         mkStr (T.pack $ coerce imageTag))
+      , ("tag",         mkStr (Text.pack $ coerce imageTag))
       , ("imageConfig", fetchconfig)
       , ("imageLayers", fetchlayers)
       ]))
@@ -173,18 +175,22 @@ mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
 
 
 -- | Generate a @fetchDockerConfig { ... }@ function call and
--- argument attrset. This function takes an argument for a list of
--- static keys to inherit from the parent attribute set; it helps
--- reduce the noise in the output expression.
+-- argument attrset.
+--
+-- This function takes an argument for a list of static keys to
+-- inherit from the parent attribute set; it helps reduce the noise in
+-- the output expression.
 mkFetchDockerConfig :: Binding NExpr -> Base32Digest -> NExpr
 mkFetchDockerConfig inherits (Base32Digest digest) =
     mkApp (mkSym constFetchDockerConfig)
           (Fix $ NSet [ inherits, "sha256" $= (mkStr digest) ])
 
 -- | Generate a list of Nix expression ASTs representing
--- @fetchDockerLayer { ... }@ function calls. This function takes
--- an argument for a list of static keys to inherit from the parent
--- attribute set; it helps reduce the noise in the output expression.
+-- @fetchDockerLayer { ... }@ function calls.
+--
+-- This function takes an argument for a list of static keys to
+-- inherit from the parent attribute set; it helps reduce the noise in
+-- the output expression.
 --
 -- NB: the hash digest tuple in the second argument is the base16
 -- encoded hash digest plucked from the image's manifest JSON and a
@@ -201,7 +207,7 @@ mkFetchDockerLayers :: Binding NExpr -> [(Base16Digest, Base32Digest)] -> [Bindi
 mkFetchDockerLayers inherits layerDigests =
   fmap mkFetchLayer $ Prelude.zip [0..(Prelude.length layerDigests)] layerDigests
   where
-    mkLayerId i = T.pack $ "layer" <> show i
+    mkLayerId i = Text.pack $ "layer" <> show i
     mkFetchLayer (i, ((Base16Digest d16), (Base32Digest d32))) =
       (mkLayerId i) $= mkApp (mkSym constFetchDockerLayer)
                              (Fix $ NSet
