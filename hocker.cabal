@@ -203,6 +203,9 @@ executable docker2nix
                optional-args,
                hocker
 
+
+ default-language:    Haskell2010
+
 test-suite hocker-tests
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
