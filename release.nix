@@ -1,13 +1,51 @@
-let config = import ./config.nix;
-in
-{ pkgs ? import <nixpkgs> { inherit config; } }:
 let
-  darwinPkgs = import <nixpkgs> { inherit config; system = "x86_64-darwin"; };
-  linuxPkgs  = import <nixpkgs> { inherit config; system = "x86_64-linux" ; };
-  pkgs       = import <nixpkgs> { inherit config; };
+  config = { allowUnfree = true;
+    packageOverrides = pkgs: {
+      haskellPackages = pkgs.haskellPackages.override {
+        overrides = haskellPackagesNew: haskellPackagesOld: {
+          optparse-applicative =
+            pkgs.haskell.lib.dontCheck
+              (haskellPackagesNew.callPackage ./nix/optparse-applicative.nix { });
 
+          optparse-generic =
+            haskellPackagesNew.callPackage ./nix/optparse-generic.nix { };
+
+          turtle =
+            haskellPackagesNew.callPackage ./nix/turtle.nix { };
+
+          wreq =
+            haskellPackagesNew.callPackage ./nix/wreq.nix { };
+
+          http-client =
+            haskellPackagesNew.callPackage ./nix/http-client.nix { };
+
+          http-client-tls =
+            haskellPackagesNew.callPackage ./nix/http-client-tls.nix { };
+
+          hocker =
+            pkgs.haskell.lib.overrideCabal
+              ( haskellPackagesNew.callPackage ./default.nix { } )
+              ( oldDerivation: {
+                  testToolDepends =
+                    (oldDerivation.testToolDepends or []) ++[ pkgs.nix ];
+                  buildDepends    =
+                    (oldDerivation.buildDepends or []) ++ [ pkgs.makeWrapper ];
+    
+                  postInstall     =
+                    (oldDerivation.postInstall or "") + ''
+                      wrapProgram $out/bin/hocker-* \
+                        --suffix PATH : ${pkgs.nix}/bin
+
+                      wrapProgram $out/bin/docker2nix \
+                        --suffix PATH : ${pkgs.nix}/bin
+                    '';
+                }
+              );
+        };
+      };
+    };
+  };
+
+  pkgs = import <nixpkgs> { inherit config; };
 in
-  { hocker-linux  =  linuxPkgs.haskellPackages.hocker;
-    hocker-darwin = darwinPkgs.haskellPackages.hocker;
-    hocker        =       pkgs.haskellPackages.hocker;
-  }
+  { inherit (pkgs.haskellPackages) hocker; }
