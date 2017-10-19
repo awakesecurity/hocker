@@ -5,14 +5,14 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Types.ImageTag
+-- Module      :  Hocker.Types.ImageTag
 -- Copyright   :  (C) 2016 Awake Networks
 -- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 ----------------------------------------------------------------------------
 
-module Types.ImageTag where
+module Hocker.Types.ImageTag where
 
 import           Control.DeepSeq
 import           Data.Monoid

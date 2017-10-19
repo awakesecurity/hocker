@@ -29,11 +29,11 @@ import           Options.Generic
 import           Lib
 import           Network.Wreq.Docker.Image    as Docker.Image
 import           Network.Wreq.Docker.Registry
-import           Types
-import           Types.Hash                   ()
-import           Types.ImageName
-import           Types.ImageTag
-import           Types.URI                    ()
+import           Hocker.Types
+import           Hocker.Types.Hash                   ()
+import           Hocker.Types.ImageName
+import           Hocker.Types.ImageTag
+import           Hocker.Types.URI                    ()
 
 data ProgArgs w = ProgArgs
     { -- | URI for the registry, optional

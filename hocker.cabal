@@ -39,22 +39,22 @@ library
   ghc-options:         -Wall
   hs-source-dirs:      src
   exposed-modules:
-                  Lib,
-                  Types,
-                  Types.URI,
-                  Types.Hash,
-                  Types.ImageName,
-                  Types.ImageTag,
-                  Types.Exceptions,
-                  Data.Docker.Nix,
-                  Data.Docker.Nix.Lib,
-                  Data.Docker.Nix.FetchDocker,
-                  Data.Docker.Image.Types,
                   Data.Docker.Image.AesonHelpers,
-                  Network.Wreq.ErrorHandling,
-                  Network.Wreq.Docker.Registry,
+                  Data.Docker.Image.Types,
+                  Data.Docker.Nix,
+                  Data.Docker.Nix.FetchDocker,
+                  Data.Docker.Nix.Lib,
+                  Hocker.Types,
+                  Hocker.Types.Exceptions,
+                  Hocker.Types.Hash,
+                  Hocker.Types.ImageName,
+                  Hocker.Types.ImageTag,
+                  Hocker.Types.URI,
+                  Lib,
                   Network.Wreq.Docker.Image,
-                  Network.Wreq.Docker.Image.Lib
+                  Network.Wreq.Docker.Image.Lib,
+                  Network.Wreq.Docker.Registry,
+                  Network.Wreq.ErrorHandling
   build-depends:
                 base                 >= 4.9 && < 5,
                 aeson                >= 0.9.0.1,

@@ -5,14 +5,14 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Types.URI
+-- Module      :  Hocker.Types.URI
 -- Copyright   :  (C) 2016 Awake Networks
 -- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 ----------------------------------------------------------------------------
 
-module Types.URI where
+module Hocker.Types.URI where
 
 import           Control.Lens
 import qualified Data.ByteString.Char8       as C8

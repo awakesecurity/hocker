@@ -29,8 +29,8 @@ import           Data.Docker.Nix.FetchDocker  as Nix.FetchDocker
 import           Data.Docker.Nix.Lib          as Nix.Lib
 import           Lib
 import           Network.Wreq.Docker.Registry as Docker.Registry
-import           Types
-import           Types.ImageTag
+import           Hocker.Types
+import           Hocker.Types.ImageTag
 
 tests = testGroup "FetchDocker Nix Generation Tests"
   [ goldenVsString

@@ -20,8 +20,8 @@ import           Turtle
 import           Control.Monad.Except as Except
 import qualified Data.Text            as Text
 
-import           Types
-import           Types.Exceptions
+import           Hocker.Types
+import           Hocker.Types.Exceptions
 
 -- | Convert a 'Base16Digest' to a 'Base32Digest' using the @nix-hash@
 -- utility.

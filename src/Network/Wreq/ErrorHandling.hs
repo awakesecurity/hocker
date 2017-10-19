@@ -29,7 +29,7 @@ import           Network.HTTP.Types.Status
 import           Data.HashMap.Lazy         as H
 #endif
 
-import           Types.Exceptions
+import           Hocker.Types.Exceptions
 
 interceptHttpExc :: ExceptT HockerException IO a
                  -> ExceptT HockerException IO a
