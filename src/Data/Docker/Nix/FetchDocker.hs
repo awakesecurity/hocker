@@ -33,7 +33,7 @@ import           URI.ByteString
 
 import           Data.Docker.Image.Types
 import           Data.Docker.Nix.Lib          as Nix.Lib
-import           Lib
+import           Hocker.Lib
 import           Network.Wreq.Docker.Registry (pluckLayersFrom)
 import           Types
 import           Types.Exceptions

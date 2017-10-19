@@ -40,7 +40,7 @@ import qualified Network.Wreq               as Wreq
 import           System.Directory
 
 import           Data.Docker.Image.Types
-import           Lib
+import           Hocker.Lib
 import           Types
 import           Types.Exceptions
 import           Types.ImageName

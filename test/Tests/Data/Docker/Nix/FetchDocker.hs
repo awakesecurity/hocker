@@ -27,7 +27,7 @@ import           Text.PrettyPrint.ANSI.Leijen as Text.PrettyPrint (displayS)
 import           Data.Docker.Image.Types
 import           Data.Docker.Nix.FetchDocker  as Nix.FetchDocker
 import           Data.Docker.Nix.Lib          as Nix.Lib
-import           Lib
+import           Hocker.Lib
 import           Network.Wreq.Docker.Registry as Docker.Registry
 import           Types
 import           Types.ImageTag

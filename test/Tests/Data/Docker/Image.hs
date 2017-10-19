@@ -20,7 +20,7 @@ import           Data.HashMap.Strict        as H
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
-import           Lib
+import           Hocker.Lib
 
 -----------------------------------------------------------------------------
 --
