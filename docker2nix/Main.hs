@@ -8,7 +8,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving  #-}
 {-# LANGUAGE TypeOperators       #-}
-{-# OPTIONS -fno-warn-orphans    #-}
+
+{-# OPTIONS -fno-warn-orphans        #-}
+{-# OPTIONS -fno-warn-unused-do-bind #-}
 
 -----------------------------------------------------------------------------
 -- |
