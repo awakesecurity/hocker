@@ -26,7 +26,7 @@ import           Data.Maybe                   (fromMaybe)
 import qualified Data.Text
 import           Options.Generic
 
-import           Lib
+import           Hocker.Lib
 import           Network.Wreq.Docker.Image    as Docker.Image
 import           Network.Wreq.Docker.Registry
 import           Hocker.Types

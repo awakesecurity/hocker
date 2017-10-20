@@ -21,7 +21,7 @@ import           Data.Text.IO                 as TIO
 import           Options.Generic
 import           System.IO.Temp               as Tmp
 
-import           Lib
+import           Hocker.Lib
 import           Network.Wreq.Docker.Image    as Docker.Image
 import           Network.Wreq.Docker.Registry
 import           Hocker.Types

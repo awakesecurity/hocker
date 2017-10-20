@@ -31,7 +31,7 @@ import           System.IO                    (hWaitForInput, stdin)
 
 import           Data.Docker.Image.Types
 import           Data.Docker.Nix.FetchDocker  as Nix.FetchDocker
-import           Lib
+import           Hocker.Lib
 import           Network.Wreq.Docker.Registry as Docker.Registry
 import           Hocker.Types
 import           Hocker.Types.ImageName

@@ -34,7 +34,7 @@ import           System.FilePath.Posix         as File
 import           System.Terminal.Concurrent
 
 import           Data.Docker.Image.Types
-import           Lib
+import           Hocker.Lib
 
 import           Network.Wreq.Docker.Image.Lib as Docker.Image
 import           Network.Wreq.Docker.Registry  as Docker.Registry

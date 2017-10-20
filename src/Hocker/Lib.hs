@@ -8,14 +8,14 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Lib
+-- Module      :  Hocker.Lib
 -- Copyright   :  (C) 2016 Awake Networks
 -- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 ----------------------------------------------------------------------------
 
-module Lib where
+module Hocker.Lib where
 
 import           Control.Exception            (throwIO)
 import           Control.Lens
