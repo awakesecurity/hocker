@@ -5,14 +5,14 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Types.ImageName
+-- Module      :  Hocker.Types.ImageName
 -- Copyright   :  (C) 2016 Awake Networks
 -- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 ----------------------------------------------------------------------------
 
-module Types.ImageName where
+module Hocker.Types.ImageName where
 
 import           Control.DeepSeq
 import           Data.Monoid

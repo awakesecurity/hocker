@@ -8,14 +8,14 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Types.Exceptions
+-- Module      :  Hocker.Types.Exceptions
 -- Copyright   :  (C) 2016 Awake Networks
 -- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 ----------------------------------------------------------------------------
 
-module Types.Exceptions where
+module Hocker.Types.Exceptions where
 
 import           Control.DeepSeq
 import           Control.Exception

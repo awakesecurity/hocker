@@ -4,14 +4,14 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Types.Hash
+-- Module      :  Hocker.Types.Hash
 -- Copyright   :  (C) 2016 Awake Networks
 -- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 ----------------------------------------------------------------------------
 
-module Types.Hash where
+module Hocker.Types.Hash where
 
 import qualified Crypto.Hash             as Hash
 import qualified Data.ByteArray          as BA

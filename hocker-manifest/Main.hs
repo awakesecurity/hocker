@@ -22,7 +22,7 @@ import           Options.Generic
 import           Lib
 import           Network.Wreq.Docker.Image    as Docker.Image
 import           Network.Wreq.Docker.Registry
-import           Types
+import           Hocker.Types
 
 progSummary :: Data.Text.Text
 progSummary = "Pull a docker image manifest from the registry"

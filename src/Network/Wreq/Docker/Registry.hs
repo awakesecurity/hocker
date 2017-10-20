@@ -41,10 +41,10 @@ import           System.Directory
 
 import           Data.Docker.Image.Types
 import           Lib
-import           Types
-import           Types.Exceptions
-import           Types.ImageName
-import           Types.ImageTag
+import           Hocker.Types
+import           Hocker.Types.Exceptions
+import           Hocker.Types.ImageName
+import           Hocker.Types.ImageTag
 
 -- | Default docker hub registry (@https://registry-1.docker.io/v2/@).
 defaultRegistry :: URIRef Absolute

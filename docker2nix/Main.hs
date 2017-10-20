@@ -8,7 +8,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving  #-}
 {-# LANGUAGE TypeOperators       #-}
-{-# OPTIONS -fno-warn-orphans    #-}
+
+{-# OPTIONS -fno-warn-orphans        #-}
+{-# OPTIONS -fno-warn-unused-do-bind #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -31,9 +33,9 @@ import           Data.Docker.Image.Types
 import           Data.Docker.Nix.FetchDocker  as Nix.FetchDocker
 import           Lib
 import           Network.Wreq.Docker.Registry as Docker.Registry
-import           Types
-import           Types.ImageName
-import           Types.ImageTag
+import           Hocker.Types
+import           Hocker.Types.ImageName
+import           Hocker.Types.ImageTag
 
 -- | Top-level optparse-generic CLI args data type and specification.
 data ProgArgs w = ProgArgs

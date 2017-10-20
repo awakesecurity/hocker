@@ -45,10 +45,10 @@ import           Text.PrettyPrint.ANSI.Leijen as Text.PrettyPrint (SimpleDoc,
 import           URI.ByteString
 
 import           Data.Docker.Image.Types
-import           Types
-import           Types.Exceptions
-import           Types.ImageName
-import           Types.ImageTag
+import           Hocker.Types
+import           Hocker.Types.Exceptions
+import           Hocker.Types.ImageName
+import           Hocker.Types.ImageTag
 
 -- | Throw a 'userError', exiting the program with the supplied
 -- message.
