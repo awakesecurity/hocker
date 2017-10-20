@@ -38,9 +38,9 @@ import           Hocker.Lib
 
 import           Network.Wreq.Docker.Image.Lib as Docker.Image
 import           Network.Wreq.Docker.Registry  as Docker.Registry
-import           Types
-import           Types.Exceptions
-import           Types.ImageName
+import           Hocker.Types
+import           Hocker.Types.Exceptions
+import           Hocker.Types.ImageName
 
 -- | Fetch an image from the docker registery, assembling the
 -- artifacts into a Docker V1.2 Image.

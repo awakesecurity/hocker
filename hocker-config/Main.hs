@@ -22,7 +22,7 @@ import           Options.Generic
 import           Hocker.Lib
 import           Network.Wreq.Docker.Image    as Docker.Image
 import           Network.Wreq.Docker.Registry
-import           Types
+import           Hocker.Types
 
 progSummary :: Data.Text.Text
 progSummary = "Fetch a docker image config JSON from the registry"

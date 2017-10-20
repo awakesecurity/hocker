@@ -83,7 +83,7 @@ fetchdocker rec {
   }
 ```
 
-## Private Registries
+## Private registries
 We developed these tools with private registries in-mind and they currently
 support three modes of authentication:
 
@@ -101,3 +101,33 @@ also do not supply a `--registry` flag then the tools assume you wish to make a
 request to the public docker hub registry, in which case they ask for a
 short-lived authentication token from the registry auth server and then make the
 request to the public docker hub registry.
+
+## How to build
+
+Building (and developing a patch for) this project using `cabal` is
+straight-forward if we have Nix installed:
+
+```bash
+$ nix-shell
+[nix-shell:]$ cabal --version
+cabal-install version 1.24.0.2
+compiled using version 1.24.2.0 of the Cabal library
+```
+
+... `cabal` and all of the package dependencies will be in the shell environment
+so that we can then:
+
+```bash
+[nix-shell:]$ cabal build
+```
+
+Alternatively we can `nix-build` the project, this is not recommended for
+development because Nix will not build the project incrementally:
+
+```bash
+$ nix-build --attr hocker release.nix
+these derivations will be built:
+  /nix/store/3dwvcm66360fpfqrrc4swp9y4q0jzvh9-hocker-0.1.0.0.drv
+building path(s) ‘/nix/store/g16mrfhlmb1z3qkdzr0diaqn2dhl8bv6-hocker-0.1.0.0’
+...
+```

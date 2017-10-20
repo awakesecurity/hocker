@@ -27,8 +27,8 @@ import           Data.HashMap.Strict            as H
 import           Data.Text                      (Text)
 
 import           Data.Docker.Image.AesonHelpers
-import           Types
-import           Types.ImageTag
+import           Hocker.Types
+import           Hocker.Types.ImageTag
 
 -- | Metadata needed for constructing a docker image.
 data HockerImageMeta = HockerImageMeta

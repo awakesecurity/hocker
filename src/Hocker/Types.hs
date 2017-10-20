@@ -13,14 +13,14 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Types
+-- Module      :  Hocker.Types
 -- Copyright   :  (C) 2016 Awake Networks
 -- License     :  Apache-2.0
 -- Maintainer  :  Awake Networks <opensource@awakenetworks.com>
 -- Stability   :  stable
 ----------------------------------------------------------------------------
 
-module Types where
+module Hocker.Types where
 
 import           Control.Applicative
 import           Control.Monad.Error.Class
@@ -40,11 +40,11 @@ import qualified Options.Applicative        as Options
 import           Options.Generic
 import           URI.ByteString
 
-import           Types.Exceptions
-import           Types.Hash                 ()
-import           Types.ImageName
-import           Types.ImageTag
-import           Types.URI                  ()
+import           Hocker.Types.Exceptions
+import           Hocker.Types.Hash                 ()
+import           Hocker.Types.ImageName
+import           Hocker.Types.ImageTag
+import           Hocker.Types.URI                  ()
 
 -- | Docker registry URI.
 type RegistryURI     = (URIRef Absolute)

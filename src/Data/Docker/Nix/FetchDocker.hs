@@ -35,9 +35,9 @@ import           Data.Docker.Image.Types
 import           Data.Docker.Nix.Lib          as Nix.Lib
 import           Hocker.Lib
 import           Network.Wreq.Docker.Registry (pluckLayersFrom)
-import           Types
-import           Types.Exceptions
-import           Types.ImageTag
+import           Hocker.Types
+import           Hocker.Types.Exceptions
+import           Hocker.Types.ImageTag
 
 {- Example output of the pretty-printed, generated Nix expression AST.
 { fetchdocker, fetchDockerConfig, fetchDockerLayer }:

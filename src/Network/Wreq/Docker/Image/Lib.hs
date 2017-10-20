@@ -34,9 +34,9 @@ import           System.Terminal.Concurrent
 import           Data.Docker.Image.Types
 import           Hocker.Lib
 import           Network.Wreq.Docker.Registry      as Docker.Registry
-import           Types
-import           Types.Exceptions
-import           Types.ImageTag
+import           Hocker.Types
+import           Hocker.Types.Exceptions
+import           Hocker.Types.ImageTag
 
 -- | Like @mapM@ but concurrently apply a function to the elements of
 -- the @Traversable@, limiting the maximum number of worker threads by
