@@ -122,10 +122,10 @@ so that we can then:
 ```
 
 Alternatively we can `nix-build` the project, this is not recommended for
-development because it lacks incrementalism:
+development because Nix will not build the project incrementally:
 
 ```bash
-$ nix-build --no-out-link --attr hocker release.nix
+$ nix-build --attr hocker release.nix
 these derivations will be built:
   /nix/store/3dwvcm66360fpfqrrc4swp9y4q0jzvh9-hocker-0.1.0.0.drv
 building path(s) ‘/nix/store/g16mrfhlmb1z3qkdzr0diaqn2dhl8bv6-hocker-0.1.0.0’
