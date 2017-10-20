@@ -39,7 +39,7 @@ library
   ghc-options:         -Wall
   hs-source-dirs:      src
   exposed-modules:
-                  Lib,
+                  Hocker.Lib,
                   Types,
                   Types.URI,
                   Types.Hash,
