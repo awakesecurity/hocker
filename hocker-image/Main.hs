@@ -41,4 +41,4 @@ main = unwrapRecord progSummary >>= \Options{..} -> do
         , imageLayer = Nothing
         , ..
         }
-  either (Lib.exitProgFail . show) TIO.putStrLn img
+  either (Hocker.Lib.exitProgFail . show) TIO.putStrLn img

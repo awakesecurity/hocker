@@ -38,4 +38,4 @@ main = unwrapRecord progSummary >>= \Options{..} -> do
       , imageLayer = Nothing
       , ..
       }
-  either (Lib.exitProgFail . show) (Lib.writeOrPrint out) manifest
+  either (Hocker.Lib.exitProgFail . show) (Hocker.Lib.writeOrPrint out) manifest

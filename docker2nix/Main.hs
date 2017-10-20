@@ -64,7 +64,7 @@ progSummary = "Produce a Nix expression given a manifest for a docker image via 
 
 main :: IO ()
 main = unwrapRecord progSummary >>= \ProgArgs{..} -> do
-  let (imageRepo, imageName) = Lib.splitRepository name
+  let (imageRepo, imageName) = Hocker.Lib.splitRepository name
       dockerRegistry         = fromMaybe defaultRegistry registry
 
   manifestJSON <-
@@ -76,4 +76,4 @@ main = unwrapRecord progSummary >>= \ProgArgs{..} -> do
         C8L.hGetContents h
 
   exprs <- Nix.FetchDocker.generate HockerImageMeta{..}
-  either (Lib.exitProgFail . show) Lib.pprintNixExpr exprs
+  either (Hocker.Lib.exitProgFail . show) Hocker.Lib.pprintNixExpr exprs

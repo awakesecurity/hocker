@@ -83,7 +83,7 @@ generate :: HockerImageMeta -> IO (Either HockerException NExpr)
 generate dim@HockerImageMeta{..} = runExceptT $
   case (manifestJSON ^? key "schemaVersion" . _Integer) of
     Just 2  -> do
-      nixhash      <- Lib.findExec "nix-hash"
+      nixhash      <- Hocker.Lib.findExec "nix-hash"
       configDigest <- Nix.Lib.toBase32Nix nixhash . Base16Digest $ pluckedConfigDigest
       layerDigests <- forM pluckedLayerDigests $ \d16 ->
         (Base16Digest d16,) <$> (Nix.Lib.toBase32Nix nixhash $ Base16Digest d16)
@@ -97,8 +97,8 @@ generate dim@HockerImageMeta{..} = runExceptT $
   where
     -- 'stripHashId' is necessary because digests in the manifest are
     -- prefixed by the hash algorithm used to generate them
-    pluckedConfigDigest = Lib.stripHashId $ manifestJSON ^. key "config" . key "digest" . _String
-    pluckedLayerDigests = Lib.stripHashId <$> pluckLayersFrom manifestJSON
+    pluckedConfigDigest = Hocker.Lib.stripHashId $ manifestJSON ^. key "config" . key "digest" . _String
+    pluckedLayerDigests = Hocker.Lib.stripHashId <$> pluckLayersFrom manifestJSON
 
 
 
