@@ -118,7 +118,7 @@ fetchManifest :: Hocker RspBS
 fetchManifest = ask >>= \HockerMeta{..} ->
   liftIO $ Wreq.getWith (opts auth & accept) (mkURL imageName imageTag dockerRegistry)
   where
-    mkURL (ImageName n) (ImageTag t) r = C8.unpack (serializeURIRef' $ Lib.joinURIPath [n, "manifests", t] r)
+    mkURL (ImageName n) (ImageTag t) r = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "manifests", t] r)
     accept = Wreq.header "Accept" .~
       [ "application/vnd.docker.distribution.manifest.v2+json"
       , "application/vnd.docker.distribution.manifest.list.v2+json"
@@ -130,7 +130,7 @@ fetchImageConfig :: (Hash.Digest Hash.SHA256) -> Hocker RspBS
 fetchImageConfig (showSHA -> digest) = ask >>= \HockerMeta{..} ->
   liftIO $ Wreq.getWith (opts auth) (mkURL imageName dockerRegistry)
   where
-    mkURL (ImageName n) r = C8.unpack (serializeURIRef' $ Lib.joinURIPath [n, "blobs", digest] r)
+    mkURL (ImageName n) r = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "blobs", digest] r)
 
 -- | Retrieve a compressed layer blob by its hash digest.
 -- 
@@ -184,7 +184,7 @@ checkResponseIntegrity :: (Except.MonadError HockerException m)
                        -> StrippedDigest -- ^ Hash digest, stripped of its hash algorithm identifier prefix
                        -> m RspBS
 checkResponseIntegrity r d = do
-  let contentHash = show . Lib.sha256 $ r ^. Wreq.responseBody
+  let contentHash = show . Hocker.Lib.sha256 $ r ^. Wreq.responseBody
       digestHash  = Text.unpack d
   if | contentHash == digestHash -> pure r
      | otherwise ->
@@ -217,7 +217,7 @@ checkResponseIntegrity' rsp =
     -- Since some registries may send back no Docker-Content-Digest
     -- header, or an empty one, if it is empty then ignore it
     ""     -> pure rsp
-    digest -> checkResponseIntegrity rsp (Lib.stripHashId digest)
+    digest -> checkResponseIntegrity rsp (Hocker.Lib.stripHashId digest)
 
 -- | Compute a sha256 hash digest for a file and compare that hash to
 -- the supplied hash digest.
@@ -230,7 +230,7 @@ checkFileIntegrity fp digest =
     when (not exists) $
       fail (fp <> " does not exist")
 
-    fileHash <- liftIO (return . show . Lib.sha256 =<< C8L.readFile fp)
+    fileHash <- liftIO (return . show . Hocker.Lib.sha256 =<< C8L.readFile fp)
 
     when (Text.unpack digest /= fileHash) $
       let fhTxt = Text.pack fileHash

@@ -69,4 +69,4 @@ main = unwrapRecord progSummary >>= \ProgArgs{..} -> do
       , imageLayer = Just imageLayer
       , ..
       }
-  either (Lib.exitProgFail . show) Prelude.putStrLn layerPath
+  either (Hocker.Lib.exitProgFail . show) Prelude.putStrLn layerPath

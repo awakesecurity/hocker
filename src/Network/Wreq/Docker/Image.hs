@@ -47,14 +47,14 @@ import           Hocker.Types.ImageName
 fetchImage :: HockerMeta -> IO (Either HockerException Text)
 fetchImage =
   runHocker $ ask >>= \HockerMeta{..} -> do
-    imageOutDir  <- Lib.requirePath outDir
+    imageOutDir  <- Hocker.Lib.requirePath outDir
     manifest     <- fetchManifest >>= checkResponseIntegrity'
     configDigest <- getConfigDigest $ manifest ^. Wreq.responseBody
 
     -- TODO: use Managed
 
     -- Fetch and write the configuration json file for the image
-    let configFileHash = Lib.stripHashId . Text.pack $ showSHA configDigest
+    let configFileHash = Hocker.Lib.stripHashId . Text.pack $ showSHA configDigest
     imageConfig     <- fetchImageConfig configDigest
     imageConfigFile <- writeRespBody
                          (File.joinPath [imageOutDir, Text.unpack configFileHash] `addExtension` "json")
@@ -62,7 +62,7 @@ fetchImage =
                          imageConfig
 
     let refLayers        = pluckRefLayersFrom $ imageConfig ^. Wreq.responseBody
-        refLayers'       = fmap Lib.stripHashId refLayers
+        refLayers'       = fmap Hocker.Lib.stripHashId refLayers
         refLayerSet      = Set.fromList refLayers'
         manifestLayers   = pluckLayersFrom $ manifest ^. Wreq.responseBody
         (_, strippedReg) = Text.breakOnEnd "//" . Text.pack . show $ dockerRegistry
@@ -99,7 +99,7 @@ Difference: ${dffLayerSetTxt}
 fetchLayer :: HockerMeta -> IO (Either HockerException FilePath)
 fetchLayer =
   runHocker $ ask >>= \HockerMeta{..} -> do
-    layerOut    <- Lib.requirePath out
+    layerOut    <- Hocker.Lib.requirePath out
     layerDigest <- Text.pack . show <$> maybe
       (throwError $ hockerException
         "a layer digest is expected!")

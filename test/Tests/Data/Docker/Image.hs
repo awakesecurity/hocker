@@ -41,7 +41,7 @@ testImageManifestGoldenEncoding =
                       [ "library/debian:jessie" ]
                       [ "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9/layer.tar" ]
                     ]
-  in (Lib.encodeCanonical imgManifest) @?= (C8L.pack goldenStr)
+  in (Hocker.Lib.encodeCanonical imgManifest) @?= (C8L.pack goldenStr)
 
 testImageManifestTwoWayEncoding =
   let imgManifest = [ImageManifest
@@ -49,7 +49,7 @@ testImageManifestTwoWayEncoding =
                       [ "library/debian:jessie" ]
                       [ "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9/layer.tar" ]
                     ]
-      encoded     = Lib.encodeCanonical imgManifest
+      encoded     = Hocker.Lib.encodeCanonical imgManifest
   in decode encoded @?= (Just imgManifest)
 
 testImageRepositoriesGoldenEncoding =
@@ -61,7 +61,7 @@ testImageRepositoriesGoldenEncoding =
                            "jessie"
                            "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9")]
 
-  in (Lib.encodeCanonical imgRepos) @?= (C8L.pack goldenStr)
+  in (Hocker.Lib.encodeCanonical imgRepos) @?= (C8L.pack goldenStr)
 
 testImageRepositoriesTwoWayEncoding =
   let imgRepos = ImageRepositories
@@ -70,5 +70,5 @@ testImageRepositoriesTwoWayEncoding =
                      (H.singleton
                         "jessie"
                         "10a267c67f423630f3afe5e04bbbc93d578861ddcc54283526222f3ad5e895b9")]
-      encoded  = Lib.encodeCanonical imgRepos
+      encoded  = Hocker.Lib.encodeCanonical imgRepos
   in decode encoded @?= (Just imgRepos)

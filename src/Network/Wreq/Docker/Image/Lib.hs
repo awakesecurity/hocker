@@ -79,7 +79,7 @@ fetchLayer writeC layer@(refl, (stripHashId -> layer')) = ask >>= \HockerMeta{..
   let decompressed = fetchedImageLayer & Wreq.responseBody %~ GZip.decompress
       shortRef     = Text.take 7 refl
 
-  imageOutDir <- Lib.requirePath outDir
+  imageOutDir <- Hocker.Lib.requirePath outDir
 
   liftIO $ writeC " => decompressed "
 
@@ -101,10 +101,10 @@ createImageManifest repoTag imageConfigFile refls = ask >>= \HockerMeta{..} -> d
           (takeBaseName imageConfigFile `addExtension` "json")
           [Text.pack (repoTag ++ ":" ++ coerce imageTag)]
           (fmap ((`addExtension` "tar") . Text.unpack) refls) ]
-  imageOutDir <- Lib.requirePath outDir
+  imageOutDir <- Hocker.Lib.requirePath outDir
   liftIO $ C8L.writeFile
     (imageOutDir </> "manifest" `addExtension` "json")
-    (Lib.encodeCanonical imageManifest)
+    (Hocker.Lib.encodeCanonical imageManifest)
 
 -- | Generate a @repositories@ json file.
 --
@@ -125,17 +125,17 @@ createImageRepository repoTag refls = ask >>= \HockerMeta{..} -> do
           (HashMap.singleton
            (Text.pack $ coerce imageTag)
            ((Prelude.last refls) <> ".tar"))
-  imageOutDir <- Lib.requirePath outDir
+  imageOutDir <- Hocker.Lib.requirePath outDir
   liftIO $ C8L.writeFile
     (imageOutDir </> "repositories")
-    (Lib.encodeCanonical repositories)
+    (Hocker.Lib.encodeCanonical repositories)
 
 -- | Tar and gzip the output dir into the final docker image archive
 -- and remove the output dir.
 createImageTar :: Hocker FilePath
 createImageTar = ask >>= \HockerMeta{..} -> do
-  imageOutDir <- Lib.requirePath outDir
-  archivePath <- Lib.requirePath out
+  imageOutDir <- Hocker.Lib.requirePath outDir
+  archivePath <- Hocker.Lib.requirePath out
 
   entries <- liftIO $ Directory.getDirectoryContents imageOutDir
 

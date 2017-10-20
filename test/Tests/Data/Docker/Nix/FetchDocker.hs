@@ -46,7 +46,7 @@ testBase16toBase32 = do
       b32     = Base32Digest "0nqvl43cvfvsw4qd0iay7f22vjph4fcnbpgjbz8gzpx8s6id942w"
 
   res <- Except.runExceptT $ do
-    nixhash <- Lib.findExec "nix-hash"
+    nixhash <- Hocker.Lib.findExec "nix-hash"
     Nix.Lib.toBase32Nix nixhash b16
 
   either
@@ -68,6 +68,6 @@ generateFetchDockerNix = do
       }
 
   either
-    (Lib.die . Text.pack . show)
-    (return . C8L.pack . (flip displayS "") . Lib.renderNixExpr)
+    (Hocker.Lib.die . Text.pack . show)
+    (return . C8L.pack . (flip displayS "") . Hocker.Lib.renderNixExpr)
     nixExpression
