@@ -1,18 +1,18 @@
 name:                hocker
 version:             1.0.0
-synopsis:            Utilities for interacting with the docker registry and generating nix build instructions
-homepage:            https://github.com/awakenetworks/hocker#readme
-Bug-Reports:         https://github.com/awakenetworks/hocker/issues
+synopsis:            Interact with the docker registry and generate nix build instructions
+homepage:            https://github.com/awakesecurity/hocker#readme
+Bug-Reports:         https://github.com/awakesecurity/hocker/issues
 license:             Apache-2.0
 license-file:        LICENSE
-author:              Awake networks
-maintainer:          opensource@awakenetworks.com
-copyright:           2016 Awake Networks
+author:              Awake Security
+maintainer:          opensource@awakesecurity.com
+copyright:           2016 Awake Security
 category:            Utilities
 build-type:          Simple
-extra-source-files:  LICENSE
+
 cabal-version:       >=1.10
-Tested-With:         GHC == 8.0.1
+Tested-With:         GHC == 8.0.2
 Description:
     @hocker@ is a suite of command line utilities and a library for:
     .
@@ -29,14 +29,19 @@ Description:
     These tools /only/ work with version 2 of the docker registry and
     docker version (>=) 1.10.
     .
-    For a complete set of usage examples please see the project's <https://github.com/awakenetworks/hocker#readme README.md>.
+    For a complete set of usage examples please see the project's <https://github.com/awakesecurity/hocker#readme README.md>.
+
+extra-source-files:
+  LICENSE
+  README.md
+  CHANGELOG.md
 
 source-repository head
   type:     git
-  location: https://github.com/awakenetworks/hocker
+  location: https://github.com/awakesecurity/hocker.git
 
 library
-  ghc-options:         -Wall -Werror
+  ghc-options:         -Wall
   hs-source-dirs:      src
   exposed-modules:
                   Data.Docker.Image.AesonHelpers,
@@ -104,7 +109,7 @@ library
 executable hocker-image
   hs-source-dirs:      hocker-image
   main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Werror
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   build-depends:
                 base                 >= 4.9 && < 5,
                 bytestring           >= 0.10,
@@ -124,7 +129,7 @@ executable hocker-image
 executable hocker-layer
   hs-source-dirs:      hocker-layer
   main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Werror
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   build-depends:
                 base                 >= 4.9 && < 5,
                 bytestring           >= 0.10,
@@ -145,7 +150,7 @@ executable hocker-layer
 executable hocker-config
   hs-source-dirs:      hocker-config
   main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Werror
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   build-depends:
                 base                 >= 4.9 && < 5,
                 bytestring           >= 0.10,
@@ -165,7 +170,7 @@ executable hocker-config
 executable hocker-manifest
   hs-source-dirs:      hocker-manifest
   main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Werror
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   build-depends:
                 base                 >= 4.9 && < 5,
                 text                 >= 1.2,
@@ -185,7 +190,7 @@ executable hocker-manifest
 executable docker2nix
  hs-source-dirs:      docker2nix
  main-is:             Main.hs
- ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Werror
+ ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
  build-depends:
                base                 >= 4.9 && < 5,
                bytestring           >= 0.10,
