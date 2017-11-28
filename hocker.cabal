@@ -1,6 +1,6 @@
 name:                hocker
 version:             1.0.0
-synopsis:            Utilities for interacting with the docker registry and generating nix build instructions
+synopsis:            Interact with the docker registry and generate nix build instructions
 homepage:            https://github.com/awakesecurity/hocker#readme
 Bug-Reports:         https://github.com/awakesecurity/hocker/issues
 license:             Apache-2.0
