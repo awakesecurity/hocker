@@ -36,6 +36,9 @@ extra-source-files:
   README.md
   CHANGELOG.md
 
+data-dir:
+  test/data
+
 source-repository head
   type:     git
   location: https://github.com/awakesecurity/hocker.git
