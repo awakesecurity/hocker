@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+### Fixed
+
+- `hocker-config` and `hocker-layer` fail the response integrity check (#23)
+- Missing `test/data` directory in cabal source distribution
+
 ## 1.0.1
 ### Fixed
 
