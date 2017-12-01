@@ -120,9 +120,7 @@ fetchManifest = ask >>= \HockerMeta{..} ->
   where
     mkURL (ImageName n) (ImageTag t) r = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "manifests", t] r)
     accept = Wreq.header "Accept" .~
-      [ "application/vnd.docker.distribution.manifest.v2+json"
-      , "application/vnd.docker.distribution.manifest.list.v2+json"
-      ]
+      [ "application/vnd.docker.distribution.manifest.v2+json" ]
 
 -- | Retrieve the configuratino JSON of an image by its hash digest
 -- (found in the V2 manifest for an image given by a name and a tag).
