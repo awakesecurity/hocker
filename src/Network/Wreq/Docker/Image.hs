@@ -111,7 +111,7 @@ fetchLayer =
     writeC <- liftIO $ getConcurrentOutputter
     liftIO . writeC . Text.unpack $ "Downloading layer: " <> shortRef
 
-    fetchedImageLayer <- checkResponseIntegrity' =<< Docker.Registry.fetchLayer ("sha256:" <> layerDigest)
+    fetchedImageLayer <- Docker.Registry.fetchLayer ("sha256:" <> layerDigest)
     layerPath         <- writeRespBody layerOut layerDigest fetchedImageLayer
 
     liftIO . writeC $ Text.unpack ("=> wrote " <> shortRef)
@@ -125,7 +125,6 @@ fetchConfig =
   runHocker $ ask >>= \HockerMeta{..} -> do
     configDigest <-
       fetchManifest
-        >>= checkResponseIntegrity'
         >>= getConfigDigest . view Wreq.responseBody
 
     fetchImageConfig configDigest
