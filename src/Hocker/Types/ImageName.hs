@@ -23,6 +23,7 @@ newtype ImageName = ImageName { unImageName :: String }
   deriving (Generic, Show)
 
 instance ParseField ImageName where
+  readField = ImageName <$> Options.str
   parseField _ _ _ =
     ImageName <$>
       (Options.argument Options.str $
