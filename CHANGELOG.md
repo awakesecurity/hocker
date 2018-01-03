@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3
+### Added
+- `readField` implementations for the custom `ParseField` instances to
+  accommodate a minor API change in `optparse-generic` version `1.2.3`
+
 ## 1.0.2
 ### Fixed
 
