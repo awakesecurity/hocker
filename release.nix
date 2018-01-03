@@ -22,6 +22,9 @@ let
           http-client-tls =
             haskellPackagesNew.callPackage ./nix/http-client-tls.nix { };
 
+          Only =
+            haskellPackagesNew.callPackage ./nix/Only.nix { };
+
           hocker =
             pkgs.haskell.lib.overrideCabal
               ( haskellPackagesNew.callPackage ./default.nix { } )
