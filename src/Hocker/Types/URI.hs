@@ -31,6 +31,7 @@ uriReader = Options.eitherReader parseURIArg
       over _Left show parsedURI
 
 instance ParseField (URIRef Absolute) where
+  readField = uriReader
   parseField h n s =
       (Options.option uriReader $
        ( Options.metavar "URI"
