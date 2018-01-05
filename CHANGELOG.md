@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+### Changed
+- Switched to the `nix-paths` library which provides compile-time constants for
+  the Nix executables instead of relying on findexec and hoping Nix is on the
+  PATH
+
 ## 1.0.3
 ### Added
 - `readField` implementations for the custom `ParseField` instances to
