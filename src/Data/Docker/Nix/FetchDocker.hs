@@ -83,10 +83,9 @@ generate :: HockerImageMeta -> IO (Either HockerException NExpr)
 generate dim@HockerImageMeta{..} = runExceptT $
   case (manifestJSON ^? key "schemaVersion" . _Integer) of
     Just 2  -> do
-      nixhash      <- Hocker.Lib.findExec "nix-hash"
-      configDigest <- Nix.Lib.toBase32Nix nixhash . Base16Digest $ pluckedConfigDigest
+      configDigest <- Nix.Lib.toBase32Nix . Base16Digest $ pluckedConfigDigest
       layerDigests <- forM pluckedLayerDigests $ \d16 ->
-        (Base16Digest d16,) <$> (Nix.Lib.toBase32Nix nixhash $ Base16Digest d16)
+        (Base16Digest d16,) <$> (Nix.Lib.toBase32Nix $ Base16Digest d16)
 
       ExceptT (pure $ generateFetchDockerExpr dim configDigest layerDigests)
     Just v  ->

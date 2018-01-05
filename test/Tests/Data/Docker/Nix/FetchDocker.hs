@@ -19,6 +19,7 @@ import           Data.ByteString.Lazy.Char8   as C8L
 import           Data.Either                  (either)
 import qualified Data.Text                    as Text
 import           Network.URI
+
 import           Test.Tasty
 import           Test.Tasty.Golden
 import           Test.Tasty.HUnit
@@ -45,9 +46,7 @@ testBase16toBase32 = do
   let b16     = Base16Digest "5c90d4a2d1a8dfffd05ff2dd659923f0ca2d843b5e45d030e17abbcd06a11b5b"
       b32     = Base32Digest "0nqvl43cvfvsw4qd0iay7f22vjph4fcnbpgjbz8gzpx8s6id942w"
 
-  res <- Except.runExceptT $ do
-    nixhash <- Hocker.Lib.findExec "nix-hash"
-    Nix.Lib.toBase32Nix nixhash b16
+  res <- Except.runExceptT (Nix.Lib.toBase32Nix b16)
 
   either
     (assertFailure . show)

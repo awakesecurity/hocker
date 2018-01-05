@@ -100,12 +100,13 @@ library
                 text                 >= 1.2,
                 time                 >= 1.4,
                 transformers         >= 0.4,
-                turtle               >= 1.3,
+                turtle               >= 1.3.0 && < 1.5,
                 unordered-containers >= 0.2,
                 uri-bytestring       >= 0.2,
                 vector               >= 0.11,
                 wreq                 >= 0.4,
-                zlib                 >= 0.6
+                zlib                 >= 0.6,
+                nix-paths            >= 1.0.1 && < 1.1
 
   default-language:    Haskell2010
 
