@@ -23,6 +23,8 @@ import qualified Data.Text            as Text
 import           Hocker.Types
 import           Hocker.Types.Exceptions
 
+import qualified Nix.Paths
+
 -- | Convert a 'Base16Digest' to a 'Base32Digest' using the @nix-hash@
 -- utility.
 --
@@ -32,11 +34,12 @@ import           Hocker.Types.Exceptions
 -- instead of re-implementing their algorithm because it's
 -- non-standard and may change, creating a maintenance headache and
 -- surprise behavior.
-toBase32Nix :: (MonadIO m, Except.MonadError HockerException m)
-            => Prelude.FilePath -- ^ Path to the @nix-hash@ executable, see 'Lib.findExec'
-            -> Base16Digest     -- ^ 'Base16Digest' to @base32@ encode
-            -> m Base32Digest
-toBase32Nix nixhash (Base16Digest d16) = do
+toBase32Nix
+  :: (MonadIO m, Except.MonadError HockerException m)
+  => Base16Digest
+  -> m Base32Digest
+toBase32Nix (Base16Digest d16) = do
+  let nixhash       = Nix.Paths.nixHash
   let hockerExc m   = HockerException m Nothing Nothing
   let convertDigest =
         inprocWithErr
