@@ -1,10 +1,15 @@
 let
-  config = { allowUnfree = true;
-    packageOverrides = pkgs: {
-      haskellPackages = pkgs.haskellPackages.override {
+
+  config = { allowUnfree = true; };
+
+  overlays = [
+    (newPkgs: oldPkgs: {
+
+      haskellPackages = oldPkgs.haskellPackages.override {
         overrides = haskellPackagesNew: haskellPackagesOld: {
+
           optparse-applicative =
-            pkgs.haskell.lib.dontCheck
+            newPkgs.haskell.lib.dontCheck
               (haskellPackagesNew.callPackage ./nix/optparse-applicative.nix { });
 
           optparse-generic =
@@ -13,22 +18,20 @@ let
           turtle =
             haskellPackagesNew.callPackage ./nix/turtle.nix { };
 
-          http-client =
-            haskellPackagesNew.callPackage ./nix/http-client.nix { };
-
-          http-client-tls =
-            haskellPackagesNew.callPackage ./nix/http-client-tls.nix { };
-
-          Only =
-            haskellPackagesNew.callPackage ./nix/Only.nix { };
+          nix-paths =
+            haskellPackagesNew.callPackage ./nix/nix-paths.nix { };
 
           hocker =
             haskellPackagesNew.callPackage ./default.nix { };
         };
       };
-    };
-  };
 
-  pkgs = import <nixpkgs> { inherit config; };
+    })
+  ];
+
+  nixpkgs = import ./nix/17_09.nix;
+
+  pkgs = import nixpkgs { inherit config overlays; };
+
 in
   { inherit (pkgs.haskellPackages) hocker; }
