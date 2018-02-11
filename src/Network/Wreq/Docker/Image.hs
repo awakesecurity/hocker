@@ -28,10 +28,12 @@ import           Data.HashSet                  as Set
 import           Data.Monoid
 import           Data.Text                     (Text)
 import qualified Data.Text                     as Text
+import           Data.Text.Encoding            (decodeUtf8')
 import           NeatInterpolation
 import qualified Network.Wreq                  as Wreq
 import           System.FilePath.Posix         as File
 import           System.Terminal.Concurrent
+import qualified URI.ByteString                as URI
 
 import           Data.Docker.Image.Types
 import           Hocker.Lib
@@ -53,6 +55,11 @@ fetchImage =
 
     -- TODO: use Managed
 
+    let serializedDockerRegistry = URI.serializeURIRef' dockerRegistry
+    let badDecode e = throwError (HockerException (show e) Nothing Nothing)
+
+    dockerRegistryText <- either badDecode pure (decodeUtf8' serializedDockerRegistry)
+
     -- Fetch and write the configuration json file for the image
     let configFileHash = Hocker.Lib.stripHashId . Text.pack $ showSHA configDigest
     imageConfig     <- fetchImageConfig configDigest
@@ -65,7 +72,7 @@ fetchImage =
         refLayers'       = fmap Hocker.Lib.stripHashId refLayers
         refLayerSet      = Set.fromList refLayers'
         manifestLayers   = pluckLayersFrom $ manifest ^. Wreq.responseBody
-        (_, strippedReg) = Text.breakOnEnd "//" . Text.pack . show $ dockerRegistry
+        (_, strippedReg) = Text.breakOnEnd "//" dockerRegistryText
         repoTags         = (Text.unpack strippedReg) </> (coerce imageName)
 
     -- Concurrently fetch layers and write to disk with a limit of three
