@@ -48,7 +48,7 @@ fetchImage :: HockerMeta -> IO (Either HockerException Text)
 fetchImage =
   runHocker $ ask >>= \HockerMeta{..} -> do
     imageOutDir  <- Hocker.Lib.requirePath outDir
-    manifest     <- fetchManifest >>= checkResponseIntegrity'
+    manifest     <- fetchManifest
     configDigest <- getConfigDigest $ manifest ^. Wreq.responseBody
 
     -- TODO: use Managed
