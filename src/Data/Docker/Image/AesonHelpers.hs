@@ -9,7 +9,7 @@
 
 module Data.Docker.Image.AesonHelpers where
 
-import           Data.Aeson
+import           Data.Aeson.Types
 
 -- | Produce a default option record with @omitNothingFields@ set to
 -- True by default.
