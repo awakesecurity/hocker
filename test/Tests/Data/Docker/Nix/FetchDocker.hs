@@ -36,7 +36,7 @@ import           Hocker.Types.ImageTag
 tests = testGroup "FetchDocker Nix Generation Tests"
   [ goldenVsString
       "Golden vs. Generated `fetchDocker' Nix Expression"
-      "test/data/golden-debian:jessie.nix"
+      "test/data/golden-debian_jessie.nix"
       generateFetchDockerNix
   , testCase "Base16 Digest to Base32 Digest" testBase16toBase32
   ]
@@ -55,7 +55,7 @@ testBase16toBase32 = do
 
 generateFetchDockerNix :: IO C8L.ByteString
 generateFetchDockerNix = do
-  manifest      <- C8L.readFile "test/data/manifest-debian:jessie.json"
+  manifest      <- C8L.readFile "test/data/manifest-debian_jessie.json"
   nixExpression <- Nix.FetchDocker.generate
     HockerImageMeta
       { imageRepo      = "library"
