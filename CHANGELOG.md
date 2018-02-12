@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.5
+### Fixed
+- Add the golden test data to the source distribution by using `data-files`
+  instead of the incorrect `data-dir`, this fixes the problem of `cabal test`
+  failing when run outside of the repository root on an unpacked tarball of the
+  source distribution from Hackage
+- The failing response integrity check in `hocker-image` by removing the check,
+  the fix and its rationale are exactly the same as applied to `hocker-config`
+  and `hocker-layer` in the `1.0.2` release
+- Incorrect serialization of the registry URI in the `fetchImage` function,
+  resulting in a malformed repository string that `docker load` would fail to
+  import
+
 ## 1.0.4
 ### Changed
 - Switched to the `nix-paths` library which provides compile-time constants for
