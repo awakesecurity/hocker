@@ -36,8 +36,9 @@ extra-source-files:
   README.md
   CHANGELOG.md
 
-data-dir:
-  test/data
+data-files:
+  test/data/golden-debian:jessie.nix
+  test/data/manifest-debian:jessie.json
 
 source-repository head
   type:     git
