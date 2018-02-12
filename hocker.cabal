@@ -37,8 +37,8 @@ extra-source-files:
   CHANGELOG.md
 
 data-files:
-  test/data/golden-debian:jessie.nix
-  test/data/manifest-debian:jessie.json
+  test/data/golden-debian_jessie.nix
+  test/data/manifest-debian_jessie.json
 
 source-repository head
   type:     git
