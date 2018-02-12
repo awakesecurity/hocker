@@ -1,5 +1,5 @@
 name:                hocker
-version:             1.0.4
+version:             1.0.5
 synopsis:            Interact with the docker registry and generate nix build instructions
 homepage:            https://github.com/awakesecurity/hocker#readme
 Bug-Reports:         https://github.com/awakesecurity/hocker/issues
