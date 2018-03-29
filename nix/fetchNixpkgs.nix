@@ -16,7 +16,7 @@ ifThenElse {
   thenValue = (
     builtins.fetchTarball {
       url = "https://github.com/NixOS/nixpkgs/archive/${rev}.tar.gz";
-      inherit sha256;
+      sha256 = outputSha256;
     });
 
   # This hack should at least work for Nix 1.11
