@@ -7,29 +7,22 @@ let
 
       haskellPackages = oldPkgs.haskellPackages.override {
         overrides = haskellPackagesNew: haskellPackagesOld: {
-
-          optparse-applicative =
+          hnix =
             newPkgs.haskell.lib.dontCheck
-              (haskellPackagesNew.callPackage ./nix/optparse-applicative.nix { });
+              (haskellPackagesNew.callPackage ./nix/hnix.nix { });
 
-          optparse-generic =
-            haskellPackagesNew.callPackage ./nix/optparse-generic.nix { };
+          hocker = haskellPackagesNew.callPackage ./default.nix { };
 
-          turtle =
-            haskellPackagesNew.callPackage ./nix/turtle.nix { };
+          megaparsec = haskellPackagesNew.callPackage ./nix/megaparsec.nix { };
 
-          nix-paths =
-            haskellPackagesNew.callPackage ./nix/nix-paths.nix { };
-
-          hocker =
-            haskellPackagesNew.callPackage ./default.nix { };
+          neat-interpolation = haskellPackagesNew.callPackage ./nix/neat-interpolation.nix { };
         };
       };
 
     })
   ];
 
-  nixpkgs = import ./nix/17_09.nix;
+  nixpkgs = import ./nix/18_09.nix;
 
   pkgs = import nixpkgs { inherit config overlays; };
 

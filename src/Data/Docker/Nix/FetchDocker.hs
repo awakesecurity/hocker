@@ -30,6 +30,7 @@ import           Data.Text.Encoding           (decodeUtf8')
 import           Data.Text.Encoding.Error
 import           Nix.Expr
 import           URI.ByteString
+import qualified Text.Megaparsec.Pos
 
 import           Data.Docker.Image.Types
 import           Data.Docker.Nix.Lib          as Nix.Lib
@@ -99,7 +100,8 @@ generate dim@HockerImageMeta{..} = runExceptT $
     pluckedConfigDigest = Hocker.Lib.stripHashId $ manifestJSON ^. key "config" . key "digest" . _String
     pluckedLayerDigests = Hocker.Lib.stripHashId <$> pluckLayersFrom manifestJSON
 
-
+emptySourcePos :: SourcePos
+emptySourcePos = Text.Megaparsec.Pos.initialPos ""
 
 {-| Generate a top-level Nix Expression AST from a 'HockerImageMeta'
 record, a config digest, and a list of layer digests.
@@ -134,10 +136,10 @@ generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
         , StaticKey "imageName"
         ]
   let genLayerId i = mkSym . Text.pack $ "layer" <> show i
-  let fetchconfig = mkFetchDockerConfig (inherit $ ((StaticKey "tag"):commonInherits)) configDigest
+  let fetchconfig = mkFetchDockerConfig (inherit ((StaticKey "tag"):commonInherits) emptySourcePos) configDigest
       fetchlayers =
         mkLets
-         (mkFetchDockerLayers (inherit commonInherits) layerDigests)
+         (mkFetchDockerLayers (inherit commonInherits emptySourcePos) layerDigests)
          (mkList $ fmap genLayerId [0..(Prelude.length layerDigests)-1])
   fetchDockerExpr <- mkFetchDocker dim fetchconfig fetchlayers
   pure
@@ -146,7 +148,8 @@ generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
         [ ("fetchdocker",       Nothing)
         , ("fetchDockerConfig", Nothing)
         , ("fetchDockerLayer",  Nothing)
-        ]) fetchDockerExpr)
+        ]
+        False) fetchDockerExpr)
 
 -- | Generate a @fetchdocker { ... }@ function call and argument
 -- attribute set. Please see 'generateFetchDockerExpr' documentation
@@ -155,7 +158,8 @@ mkFetchDocker :: HockerImageMeta -> NExpr -> NExpr -> Either HockerException NEx
 mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
   registry <- Bifunctor.first mkHockerException serializedRegistry
   pure
-    (mkApp (mkSym constFetchdocker)
+    (mkSym constFetchdocker
+     @@
      (recAttrsE
       [ ("name",        mkStr $ fromMaybe imageName altImageName)
       , ("registry",    mkStr registry)
@@ -181,7 +185,7 @@ mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
 -- the output expression.
 mkFetchDockerConfig :: Binding NExpr -> Base32Digest -> NExpr
 mkFetchDockerConfig inherits (Base32Digest digest) =
-    mkApp (mkSym constFetchDockerConfig)
+    mkSym constFetchDockerConfig @@
           (Fix $ NSet [ inherits, "sha256" $= (mkStr digest) ])
 
 -- | Generate a list of Nix expression ASTs representing
@@ -208,9 +212,9 @@ mkFetchDockerLayers inherits layerDigests =
   where
     mkLayerId i = Text.pack $ "layer" <> show i
     mkFetchLayer (i, ((Base16Digest d16), (Base32Digest d32))) =
-      (mkLayerId i) $= mkApp (mkSym constFetchDockerLayer)
+      (mkLayerId i) $= (mkSym constFetchDockerLayer @@
                              (Fix $ NSet
                                 [ inherits
                                 , "layerDigest" $= (mkStr d16) -- Required in order to perform a registry request
                                 , "sha256"      $= (mkStr d32) -- Required by Nix for fixed output derivations
-                                ])
+                                ]))

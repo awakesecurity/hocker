@@ -18,12 +18,12 @@ import           Control.Monad.Except         as Except
 import           Data.ByteString.Lazy.Char8   as C8L
 import           Data.Either                  (either)
 import qualified Data.Text                    as Text
+import qualified Data.Text.Prettyprint.Doc.Render.String
 import           Network.URI
 
 import           Test.Tasty
 import           Test.Tasty.Golden
 import           Test.Tasty.HUnit
-import           Text.PrettyPrint.ANSI.Leijen as Text.PrettyPrint (displayS)
 
 import           Data.Docker.Image.Types
 import           Data.Docker.Nix.FetchDocker  as Nix.FetchDocker
@@ -66,7 +66,9 @@ generateFetchDockerNix = do
       , altImageName   = Nothing
       }
 
+  let display = Data.Text.Prettyprint.Doc.Render.String.renderString
+
   either
     (Hocker.Lib.die . Text.pack . show)
-    (return . C8L.pack . (flip displayS "") . Hocker.Lib.renderNixExpr)
+    (return . C8L.pack . display . Hocker.Lib.renderNixExpr)
     nixExpression

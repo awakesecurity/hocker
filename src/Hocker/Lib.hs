@@ -31,6 +31,10 @@ import           Data.Coerce
 import           Data.Monoid
 import           Data.Text                    (Text)
 import qualified Data.Text                    as Text
+import           Data.Text.Prettyprint.Doc    (Doc, LayoutOptions(..),
+                                               PageWidth(..), SimpleDocStream)
+import qualified Data.Text.Prettyprint.Doc
+import qualified Data.Text.Prettyprint.Doc.Render.Text
 import           Data.Text.Encoding           (encodeUtf8)
 import qualified Network.Wreq                 as Wreq
 import           Nix.Expr                     (NExpr)
@@ -39,9 +43,7 @@ import           System.Directory             (findExecutable)
 import           System.Environment           (getProgName)
 import           System.Exit                  as Exit
 import           System.FilePath.Posix        as File
-import           Text.PrettyPrint.ANSI.Leijen as Text.PrettyPrint (SimpleDoc,
-                                                                   displayS,
-                                                                   renderPretty)
+import qualified System.IO
 import           URI.ByteString
 
 import           Data.Docker.Image.Types
@@ -169,13 +171,19 @@ splitRepository :: ImageName -> (RepoNamePart, ImageNamePart)
 splitRepository (ImageName (Text.pack -> n)) = over _2 Text.tail $ Text.break (=='/') n
 
 -- | Given a nix expression AST, produce a pretty printer document.
-renderNixExpr :: NExpr -> Text.PrettyPrint.SimpleDoc
-renderNixExpr = renderPretty 0.4 120 . prettyNix
+renderNixExpr :: NExpr -> SimpleDocStream ann
+renderNixExpr =
+    Data.Text.Prettyprint.Doc.layoutSmart layoutOptions . prettyNix
+  where
+    layoutOptions = LayoutOptions { layoutPageWidth = AvailablePerLine 120 0.4 }
 
 -- | Print a nix expression AST using the 'renderNixExpr' pretty
 -- printing renderer.
 pprintNixExpr :: NExpr -> IO ()
-pprintNixExpr expr = Prelude.putStrLn (displayS (renderNixExpr expr) "")
+pprintNixExpr expr =
+    Data.Text.Prettyprint.Doc.Render.Text.renderIO System.IO.stdout stream
+  where
+    stream = renderNixExpr expr
 
 -- | Given an executable's name, try to find it in the PATH.
 findExec :: (MonadIO m, Except.MonadError HockerException m)
