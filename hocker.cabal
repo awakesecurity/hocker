@@ -69,7 +69,7 @@ library
                 aeson                >= 1.0.0.0,
                 aeson-pretty         >= 0.8,
                 ansi-wl-pprint       >= 0.6.7.3,
-                async                >= 2.0.0.0 && < 2.2,
+                async                >= 2.0.0.0 && < 2.3,
                 bytestring           >= 0.10,
                 concurrentoutput     >= 0.2,
                 containers           >= 0.5,
