@@ -24,7 +24,7 @@ import           Control.Monad.Reader
 import qualified Data.ByteString.Lazy.Char8        as C8L
 import           Data.Coerce
 import qualified Data.HashMap.Strict               as HashMap
-import           Data.Monoid
+import           Data.Semigroup                    ((<>))
 import qualified Data.Text                         as Text
 import qualified Network.Wreq                      as Wreq
 import qualified System.Directory                  as Directory

@@ -16,7 +16,7 @@ module Hocker.Types.URI where
 
 import           Control.Lens
 import qualified Data.ByteString.Char8       as C8
-import           Data.Monoid
+import           Data.Semigroup              ((<>))
 import qualified Data.Text                   as Text
 import qualified Options.Applicative         as Options
 import           Options.Applicative.Builder
