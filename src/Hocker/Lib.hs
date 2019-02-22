@@ -28,7 +28,7 @@ import           Data.Aeson.Lens
 import qualified Data.ByteString.Char8        as C8
 import           Data.ByteString.Lazy.Char8   as C8L
 import           Data.Coerce
-import           Data.Monoid
+import           Data.Semigroup               ((<>))
 import           Data.Text                    (Text)
 import qualified Data.Text                    as Text
 import           Data.Text.Encoding           (encodeUtf8)

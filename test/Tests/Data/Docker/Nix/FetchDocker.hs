@@ -15,15 +15,19 @@ module Tests.Data.Docker.Nix.FetchDocker where
 
 import           Control.Exception            as CE
 import           Control.Monad.Except         as Except
+import           Data.ByteString              as BS
 import           Data.ByteString.Lazy.Char8   as C8L
 import           Data.Either                  (either)
 import qualified Data.Text                    as Text
+import           Data.Word8                   as W8
 import           Network.URI
 
 import           Test.Tasty
 import           Test.Tasty.Golden
+import           Test.Tasty.Golden.Advanced   (goldenTest)
 import           Test.Tasty.HUnit
 import           Text.PrettyPrint.ANSI.Leijen as Text.PrettyPrint (displayS)
+import           Text.Printf                  (printf)
 
 import           Data.Docker.Image.Types
 import           Data.Docker.Nix.FetchDocker  as Nix.FetchDocker
@@ -33,8 +37,43 @@ import           Network.Wreq.Docker.Registry as Docker.Registry
 import           Hocker.Types
 import           Hocker.Types.ImageTag
 
+-- | Compare a given string against the golden file contents,
+-- ignoring differences in contiguous nonempty spans of whitespace,
+-- and the presence or absence of whitespace before or after a comma.
+goldenVsStringCanonicalize
+  :: TestName -- ^ test name
+  -> FilePath -- ^ path to golden file
+  -> IO C8L.ByteString -- ^ action that returns string to compare
+  -> TestTree -- ^ the test verifies that the returned string equals the
+              -- golden file contents when ignoring differences in whitespace
+goldenVsStringCanonicalize name ref act =
+  goldenTest
+    name
+    (BS.readFile ref)
+    (C8L.toStrict <$> act)
+    cmp
+    upd
+  where
+  cmp x y = cmpCanonicalize msg x y
+    where
+    msg = printf "Test output was different from '%s'. It was: %s" ref (show y)
+  upd = BS.writeFile ref
+
+cmpCanonicalize ::
+  String -> BS.ByteString -> BS.ByteString -> IO (Maybe String)
+cmpCanonicalize e x y =
+    return $ if canonicalize x == canonicalize y then Nothing else Just e
+  where
+    canonicalize = BS.pack . BS.foldr op []
+    op x acc
+      | W8.isSpace x, y : _ <- acc, y == W8._space = acc
+      | W8.isSpace x, y : _ <- acc, y == W8._comma = acc
+      | W8.isSpace x = W8._space : acc
+      | x == W8._comma, y : ys <- acc, y == W8._space = W8._comma : ys
+      | otherwise = x : acc
+
 tests = testGroup "FetchDocker Nix Generation Tests"
-  [ goldenVsString
+  [ goldenVsStringCanonicalize
       "Golden vs. Generated `fetchDocker' Nix Expression"
       "test/data/golden-debian_jessie.nix"
       generateFetchDockerNix

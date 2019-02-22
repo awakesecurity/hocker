@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP               #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -23,12 +24,13 @@ import qualified Data.Bifunctor               as Bifunctor
 import           Data.Coerce
 import           Data.Fix
 import           Data.Maybe
-import           Data.Monoid
+import           Data.Semigroup               ((<>))
 import           Data.Text                    (Text)
 import qualified Data.Text                    as Text
 import           Data.Text.Encoding           (decodeUtf8')
 import           Data.Text.Encoding.Error
-import           Nix.Expr
+import           Nix.Expr                     hiding (inherit)
+import qualified Nix.Expr                     (inherit)
 import           URI.ByteString
 
 import           Data.Docker.Image.Types
@@ -38,6 +40,20 @@ import           Network.Wreq.Docker.Registry (pluckLayersFrom)
 import           Hocker.Types
 import           Hocker.Types.Exceptions
 import           Hocker.Types.ImageTag
+import           Text.Megaparsec.Pos          (Pos, mkPos)
+
+-- | @hnix-0.5.0:inherit@ requires a source location as its final argument.
+inheritAdapter :: FilePath -> Pos -> Pos -> [NKeyName e] -> Binding e
+inheritAdapter sourceName sourceLine sourceColumn ks = Nix.Expr.inherit ks
+#if MIN_VERSION_hnix(0,5,0)
+                                                         SourcePos{..}
+#endif
+
+-- | @hnix-0.5.0@ omits mkApp.
+#if MIN_VERSION_hnix(0,5,0)
+mkApp :: NExpr -> NExpr -> NExpr
+mkApp e = Fix . NBinary NApp e
+#endif
 
 {- Example output of the pretty-printed, generated Nix expression AST.
 { fetchdocker, fetchDockerConfig, fetchDockerLayer }:
@@ -134,19 +150,23 @@ generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
         , StaticKey "imageName"
         ]
   let genLayerId i = mkSym . Text.pack $ "layer" <> show i
-  let fetchconfig = mkFetchDockerConfig (inherit $ ((StaticKey "tag"):commonInherits)) configDigest
+  let fetchconfig = mkFetchDockerConfig (inheritAdapter ("generated for " ++ show imageName) (mkPos 1) (mkPos 1) $ ((StaticKey "tag"):commonInherits)) configDigest
       fetchlayers =
         mkLets
-         (mkFetchDockerLayers (inherit commonInherits) layerDigests)
+         (mkFetchDockerLayers (inheritAdapter "common inherits" (mkPos 1) (mkPos 1) commonInherits) layerDigests)
          (mkList $ fmap genLayerId [0..(Prelude.length layerDigests)-1])
   fetchDockerExpr <- mkFetchDocker dim fetchconfig fetchlayers
   pure
     (mkFunction
       (mkParamset
-        [ ("fetchdocker",       Nothing)
-        , ("fetchDockerConfig", Nothing)
+        [ ("fetchDockerConfig", Nothing)
         , ("fetchDockerLayer",  Nothing)
-        ]) fetchDockerExpr)
+        , ("fetchdocker",       Nothing)
+        ]
+#if MIN_VERSION_hnix(0,5,0)
+        False  -- not variadic
+#endif
+      ) fetchDockerExpr)
 
 -- | Generate a @fetchdocker { ... }@ function call and argument
 -- attribute set. Please see 'generateFetchDockerExpr' documentation

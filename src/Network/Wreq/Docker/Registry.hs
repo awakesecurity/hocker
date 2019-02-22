@@ -27,7 +27,6 @@ module Network.Wreq.Docker.Registry where
 import           Control.Lens
 import qualified Control.Monad.Except       as Except
 import           Control.Monad.Reader
-import           Data.Monoid
 import qualified Crypto.Hash                as Hash
 import           Data.Aeson.Lens
 import           Data.ByteString.Lazy.Char8 as C8L
@@ -35,6 +34,7 @@ import qualified Data.ByteString.Char8      as C8
 import           Data.Text.Encoding         (decodeUtf8, encodeUtf8)
 import           URI.ByteString
 import           NeatInterpolation
+import           Data.Semigroup             ((<>))
 import qualified Data.Text                  as Text
 import qualified Network.Wreq               as Wreq
 import           System.Directory
@@ -64,7 +64,7 @@ defaultRegistry = URI
 --
 -- If 'Credentials' is either 'BearerToken' or 'Basic' then produce a
 -- 'Wreq.Auth' value for that type of credential.
--- 
+--
 -- If @Nothing@ is provided _and_ the provided 'RegistryURI' matches
 -- the default registry, make a request to
 -- @https://auth.docker.io/token@ for a temporary pull-only bearer
@@ -131,7 +131,7 @@ fetchImageConfig (showSHA -> digest) = ask >>= \HockerMeta{..} ->
     mkURL (ImageName n) r = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "blobs", digest] r)
 
 -- | Retrieve a compressed layer blob by its hash digest.
--- 
+--
 -- TODO: take advantage of registry's support for the Range header so
 -- we can stream downloads.
 fetchLayer :: Layer -> Hocker RspBS
