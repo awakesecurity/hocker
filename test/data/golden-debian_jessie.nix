@@ -1,6 +1,6 @@
-{ fetchdocker
-  , fetchDockerConfig
-  , fetchDockerLayer }:
+{ fetchDockerConfig
+  , fetchDockerLayer
+  , fetchdocker }:
   fetchdocker rec {
     name = "debian";
     registry = "https://registry-1.docker.io/v2/";

@@ -25,7 +25,7 @@ import           Data.ByteString.Lazy.Char8    as C8L
 import           Data.Coerce
 import           Data.Either
 import           Data.HashSet                  as Set
-import           Data.Monoid
+import           Data.Semigroup                ((<>))
 import           Data.Text                     (Text)
 import qualified Data.Text                     as Text
 import           Data.Text.Encoding            (decodeUtf8')

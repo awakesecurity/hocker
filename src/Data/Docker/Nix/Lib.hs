@@ -15,7 +15,7 @@
 
 module Data.Docker.Nix.Lib where
 
-import           Control.Foldl        as Foldl
+import qualified Control.Foldl        as Foldl
 import           Turtle
 import           Control.Monad.Except as Except
 import qualified Data.Text            as Text

@@ -31,7 +31,7 @@ import           Control.Monad.Reader.Class
 import qualified Crypto.Hash                as Hash
 import qualified Data.ByteString.Lazy
 import           Data.Char                  (toUpper)
-import           Data.Monoid
+import           Data.Semigroup             ((<>))
 import           Data.Text                  (Text)
 import qualified Data.Text                  as Text
 import qualified Network.Wreq               as Wreq
