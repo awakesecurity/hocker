@@ -115,8 +115,6 @@ generate dim@HockerImageMeta{..} = runExceptT $
     pluckedConfigDigest = Hocker.Lib.stripHashId $ manifestJSON ^. key "config" . key "digest" . _String
     pluckedLayerDigests = Hocker.Lib.stripHashId <$> pluckLayersFrom manifestJSON
 
-
-
 {-| Generate a top-level Nix Expression AST from a 'HockerImageMeta'
 record, a config digest, and a list of layer digests.
 
@@ -162,7 +160,8 @@ generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
         [ ("fetchDockerConfig", Nothing)
         , ("fetchDockerLayer",  Nothing)
         , ("fetchdocker",       Nothing)
-        ]
+        ] -- List keys in sorted order so that we do not care
+          -- whether hnix sorts keys or preserves this order.
 #if MIN_VERSION_hnix(0,5,0)
         False  -- not variadic
 #endif
@@ -175,7 +174,8 @@ mkFetchDocker :: HockerImageMeta -> NExpr -> NExpr -> Either HockerException NEx
 mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
   registry <- Bifunctor.first mkHockerException serializedRegistry
   pure
-    (mkApp (mkSym constFetchdocker)
+    (mkSym constFetchdocker
+     @@
      (recAttrsE
       [ ("name",        mkStr $ fromMaybe imageName altImageName)
       , ("registry",    mkStr registry)
@@ -201,7 +201,7 @@ mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
 -- the output expression.
 mkFetchDockerConfig :: Binding NExpr -> Base32Digest -> NExpr
 mkFetchDockerConfig inherits (Base32Digest digest) =
-    mkApp (mkSym constFetchDockerConfig)
+    mkSym constFetchDockerConfig @@
           (Fix $ NSet [ inherits, "sha256" $= (mkStr digest) ])
 
 -- | Generate a list of Nix expression ASTs representing
@@ -228,9 +228,9 @@ mkFetchDockerLayers inherits layerDigests =
   where
     mkLayerId i = Text.pack $ "layer" <> show i
     mkFetchLayer (i, ((Base16Digest d16), (Base32Digest d32))) =
-      (mkLayerId i) $= mkApp (mkSym constFetchDockerLayer)
+      (mkLayerId i) $= (mkSym constFetchDockerLayer @@
                              (Fix $ NSet
                                 [ inherits
                                 , "layerDigest" $= (mkStr d16) -- Required in order to perform a registry request
                                 , "sha256"      $= (mkStr d32) -- Required by Nix for fixed output derivations
-                                ])
+                                ]))

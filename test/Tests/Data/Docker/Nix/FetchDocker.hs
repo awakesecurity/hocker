@@ -19,6 +19,7 @@ import           Data.ByteString              as BS
 import           Data.ByteString.Lazy.Char8   as C8L
 import           Data.Either                  (either)
 import qualified Data.Text                    as Text
+import qualified Data.Text.Prettyprint.Doc.Render.String
 import           Data.Word8                   as W8
 import           Network.URI
 
@@ -26,7 +27,6 @@ import           Test.Tasty
 import           Test.Tasty.Golden
 import           Test.Tasty.Golden.Advanced   (goldenTest)
 import           Test.Tasty.HUnit
-import           Text.PrettyPrint.ANSI.Leijen as Text.PrettyPrint (displayS)
 import           Text.Printf                  (printf)
 
 import           Data.Docker.Image.Types
@@ -105,7 +105,9 @@ generateFetchDockerNix = do
       , altImageName   = Nothing
       }
 
+  let display = Data.Text.Prettyprint.Doc.Render.String.renderString
+
   either
     (Hocker.Lib.die . Text.pack . show)
-    (return . C8L.pack . (flip displayS "") . Hocker.Lib.renderNixExpr)
+    (return . C8L.pack . display . Hocker.Lib.renderNixExpr)
     nixExpression
