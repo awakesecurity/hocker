@@ -15,7 +15,7 @@
 module Hocker.Types.ImageName where
 
 import           Control.DeepSeq
-import           Data.Monoid
+import           Data.Semigroup      ((<>))
 import qualified Options.Applicative as Options
 import           Options.Generic
 
