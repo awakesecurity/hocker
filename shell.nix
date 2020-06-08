@@ -1,1 +1,1 @@
-(import ./release.nix).hocker.env
+(import ./release.nix {}).hocker.env
