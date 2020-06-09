@@ -192,7 +192,6 @@ mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
     mkHockerException err =
       HockerException (show err) Nothing Nothing
 
-
 -- | Generate a @fetchDockerConfig { ... }@ function call and
 -- argument attrset.
 --
@@ -202,7 +201,7 @@ mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
 mkFetchDockerConfig :: Binding NExpr -> Base32Digest -> NExpr
 mkFetchDockerConfig inherits (Base32Digest digest) =
     mkSym constFetchDockerConfig @@
-          (Fix $ NSet [ inherits, "sha256" $= (mkStr digest) ])
+          (Fix $ NSet NNonRecursive [ inherits, "sha256" $= (mkStr digest) ])
 
 -- | Generate a list of Nix expression ASTs representing
 -- @fetchDockerLayer { ... }@ function calls.
@@ -229,7 +228,7 @@ mkFetchDockerLayers inherits layerDigests =
     mkLayerId i = Text.pack $ "layer" <> show i
     mkFetchLayer (i, ((Base16Digest d16), (Base32Digest d32))) =
       (mkLayerId i) $= (mkSym constFetchDockerLayer @@
-                             (Fix $ NSet
+                             (Fix $ NSet NNonRecursive
                                 [ inherits
                                 , "layerDigest" $= (mkStr d16) -- Required in order to perform a registry request
                                 , "sha256"      $= (mkStr d32) -- Required by Nix for fixed output derivations
