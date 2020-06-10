@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.6
+### Changed
+- Support and require hnix-0.7.0 or higher.
+- Support GHC 8.10.1.
+- Use nixpkgs 20.03 in Nix builds.
+- Discard support for Nix versions < 1.12.
+
 ## 1.0.5
 ### Fixed
 - Add the golden test data to the source distribution by using `data-files`
