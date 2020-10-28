@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.7
+### Changed
+- Support and require hnix-0.9.0 or higher.
+
 ## 1.0.6
 ### Changed
 - Support and require hnix-0.7.0 or higher.
