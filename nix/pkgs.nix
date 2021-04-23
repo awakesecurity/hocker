@@ -12,4 +12,7 @@ let
 in
 import nixpkgs {
   config = { allowUnfree = true; };
+  overlays = [
+    (import ./overlays/haskell-packages.nix)
+  ];
 }
