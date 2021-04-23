@@ -92,7 +92,7 @@ library
                 network              >= 2.6,
                 network-uri          >= 2.6,
                 optparse-applicative >= 0.13,
-                optparse-generic     >= 1.2.0,
+                optparse-generic     >= 1.4.0,
                 prettyprinter        >= 1.1.1,
                 pooled-io            >= 0.0.2,
                 pureMD5              >= 2.1,
