@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Changed
+- Support and require optparse-generic-1.4.0 or higher.
+
 ## 1.0.7
 ### Changed
 - Support and require hnix-0.9.0 or higher.

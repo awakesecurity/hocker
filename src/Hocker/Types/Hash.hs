@@ -30,12 +30,12 @@ readSHA256 = either (const Nothing) Hash.digestFromByteString . toBytes
 
 instance ParseField (Hash.Digest Hash.SHA256) where
   readField = Options.maybeReader (readSHA256 . C8.pack)
-  parseField h _ _ =
+  parseField help _long _short _value =
       (Options.option (Options.maybeReader (readSHA256 . C8.pack)) $
        ( Options.metavar "SHA256"
        <> Options.short 'l'
        <> Options.long "layer"
-       <> maybe mempty (Options.help . Data.Text.unpack) h
+       <> maybe mempty (Options.help . Data.Text.unpack) help
        )
       )
 

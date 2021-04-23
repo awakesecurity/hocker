@@ -32,12 +32,12 @@ uriReader = Options.eitherReader parseURIArg
 
 instance ParseField (URIRef Absolute) where
   readField = uriReader
-  parseField h n s =
+  parseField help long short _value =
       (Options.option uriReader $
        ( Options.metavar "URI"
-       <> foldMap (Options.long  . Text.unpack) n
-       <> foldMap Options.short s
-       <> foldMap (Options.help  . Text.unpack) h
+       <> foldMap (Options.long  . Text.unpack) long
+       <> foldMap Options.short short
+       <> foldMap (Options.help  . Text.unpack) help
        )
       )
 

@@ -24,7 +24,7 @@ newtype ImageName = ImageName { unImageName :: String }
 
 instance ParseField ImageName where
   readField = ImageName <$> Options.str
-  parseField _ _ _ =
+  parseField _help _long _short _value =
     ImageName <$>
       (Options.argument Options.str $
        ( Options.metavar "IMAGE-NAME"

@@ -24,7 +24,7 @@ newtype ImageTag = ImageTag { unImageTag :: String }
 
 instance ParseField ImageTag where
   readField = ImageTag <$> Options.str
-  parseField _ _ _ =
+  parseField _help _long _short _value =
     ImageTag <$>
       (Options.argument Options.str $
        ( Options.metavar "IMAGE-TAG"
