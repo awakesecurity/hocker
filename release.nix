@@ -75,6 +75,7 @@ let
                         "lifted-async"
                         "memory"
                         "microstache"
+                        "optparse-generic"
                         "prettyprinter"
                         "quickcheck-instances"
                         "regex-base"

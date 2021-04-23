@@ -158,7 +158,7 @@ data Credentials = Basic Username Password | BearerToken Text
 
 instance ParseField Credentials where
   readField = Options.readerError "Internal, fatal error: unexpected use of readField"
-  parseField _ _ _ = (Basic <$> parseUsername <*> parsePassword) <|> (BearerToken <$> parseToken)
+  parseField _help _long _short _value = (Basic <$> parseUsername <*> parsePassword) <|> (BearerToken <$> parseToken)
     where
       parseUsername = Text.pack <$>
         (Options.option Options.str $
