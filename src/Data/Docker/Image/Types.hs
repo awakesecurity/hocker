@@ -17,6 +17,8 @@ module Data.Docker.Image.Types where
 
 import qualified Crypto.Hash                    as Hash
 import           Data.Aeson
+import qualified Data.Aeson.Key                 as Aeson.Key
+import qualified Data.Aeson.KeyMap              as Aeson.KeyMap
 import           Data.Aeson.TH
 import           Data.Aeson.Types
 import qualified Data.ByteArray                 as BA
@@ -24,6 +26,7 @@ import qualified Data.ByteArray.Encoding        as BA
 import qualified Data.ByteString.Char8          as C8
 import           Data.ByteString.Lazy.Char8     as C8L
 import           Data.HashMap.Strict            as H
+import qualified Data.List                      as List
 import           Data.Text                      (Text)
 
 import           Data.Docker.Image.AesonHelpers
@@ -133,16 +136,18 @@ $(deriveJSON stdOpts{ fieldLabelModifier = upperFirst } ''ImageManifest)
 
 instance ToJSON ImageRepositories where
   toJSON (ImageRepositories r) =
-    Object . H.unions $ [i | o@(Object i) <- (fmap toJSON r), isObject o]
+    Object . List.foldl' Aeson.KeyMap.union mempty $
+      [i | o@(Object i) <- (fmap toJSON r), isObject o]
     where
       isObject (Object _) = True
       isObject _          = False
 
 instance ToJSON ImageRepo where
-  toJSON (ImageRepo r t) = object [ r .= toJSON t ]
+  toJSON (ImageRepo r t) = object [ Aeson.Key.fromText r .= toJSON t ]
 
 instance FromJSON ImageRepositories where
-  parseJSON (Object v) = ImageRepositories <$> (mapM buildRepo $ H.toList v)
+  parseJSON (Object v) =
+    ImageRepositories <$> (mapM buildRepo $ Aeson.KeyMap.toList v)
     where
-      buildRepo (k,v') = ImageRepo k <$> parseJSON v'
+      buildRepo (k,v') = ImageRepo (Aeson.Key.toText k) <$> parseJSON v'
   parseJSON v          = typeMismatch "ImageRepositories" v
