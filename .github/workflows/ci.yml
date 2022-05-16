@@ -8,13 +8,13 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3.0.2
         name: Checkout
-      - uses: cachix/install-nix-action@v12
+      - uses: cachix/install-nix-action@v17
         name: Install Nix
         with:
           nix_path: nixpkgs=./nix/pkgs.nix
-      - uses: cachix/cachix-action@v8
+      - uses: cachix/cachix-action@v10
         name: Set up Cachix
         with:
           name: awakesecurity
@@ -25,13 +25,13 @@ jobs:
   build-macos:
     runs-on: macos-10.15
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3.0.2
         name: Checkout
-      - uses: cachix/install-nix-action@v12
+      - uses: cachix/install-nix-action@v17
         name: Install Nix
         with:
           nix_path: nixpkgs=./nix/pkgs.nix
-      - uses: cachix/cachix-action@v8
+      - uses: cachix/cachix-action@v10
         name: Set up Cachix
         with:
           name: awakesecurity
