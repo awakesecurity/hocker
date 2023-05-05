@@ -28,13 +28,12 @@ import           Data.Aeson.Lens
 import qualified Data.ByteString.Char8        as C8
 import           Data.ByteString.Lazy.Char8   as C8L
 import           Data.Coerce
-import           Data.Semigroup               ((<>))
 import           Data.Text                    (Text)
 import qualified Data.Text                    as Text
-import           Data.Text.Prettyprint.Doc    (LayoutOptions(..),
+import           Prettyprinter                (LayoutOptions(..),
                                                PageWidth(..), SimpleDocStream)
-import qualified Data.Text.Prettyprint.Doc
-import qualified Data.Text.Prettyprint.Doc.Render.Text
+import qualified Prettyprinter
+import qualified Prettyprinter.Render.Text
 import           Data.Text.Encoding           (encodeUtf8)
 import qualified Network.Wreq                 as Wreq
 import           Nix.Expr                     (NExpr)
@@ -173,7 +172,7 @@ splitRepository (ImageName (Text.pack -> n)) = over _2 Text.tail $ Text.break (=
 -- | Given a nix expression AST, produce a pretty printer document.
 renderNixExpr :: NExpr -> SimpleDocStream ann
 renderNixExpr =
-    Data.Text.Prettyprint.Doc.layoutSmart layoutOptions . prettyNix
+    Prettyprinter.layoutSmart layoutOptions . prettyNix
   where
     layoutOptions = LayoutOptions { layoutPageWidth = AvailablePerLine 120 0.4 }
 
@@ -181,7 +180,7 @@ renderNixExpr =
 -- printing renderer.
 pprintNixExpr :: NExpr -> IO ()
 pprintNixExpr expr =
-    Data.Text.Prettyprint.Doc.Render.Text.renderIO System.IO.stdout stream
+    Prettyprinter.Render.Text.renderIO System.IO.stdout stream
   where
     stream = renderNixExpr expr
 

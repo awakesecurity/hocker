@@ -34,7 +34,6 @@ import qualified Data.ByteString.Char8      as C8
 import           Data.Text.Encoding         (decodeUtf8, encodeUtf8)
 import           URI.ByteString
 import           NeatInterpolation
-import           Data.Semigroup             ((<>))
 import qualified Data.Text                  as Text
 import qualified Network.Wreq               as Wreq
 import           System.Directory

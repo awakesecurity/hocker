@@ -24,7 +24,6 @@ import qualified Data.Bifunctor               as Bifunctor
 import           Data.Coerce
 import           Data.Fix
 import           Data.Maybe
-import           Data.Semigroup               ((<>))
 import           Data.Text                    (Text)
 import qualified Data.Text                    as Text
 import           Data.Text.Encoding           (decodeUtf8')
@@ -40,7 +39,7 @@ import           Network.Wreq.Docker.Registry (pluckLayersFrom)
 import           Hocker.Types
 import           Hocker.Types.Exceptions
 import           Hocker.Types.ImageTag
-import           Text.Megaparsec.Pos          (Pos, mkPos)
+import           Text.Megaparsec.Pos          (Pos)
 
 -- | @hnix-0.5.0:inherit@ requires a source location as its final argument.
 inheritAdapter :: FilePath -> Pos -> Pos -> [NKeyName e] -> Binding e

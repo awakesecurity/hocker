@@ -17,7 +17,6 @@ import qualified Crypto.Hash             as Hash
 import qualified Data.ByteArray          as BA
 import qualified Data.ByteArray.Encoding as BA
 import qualified Data.ByteString.Char8   as C8
-import           Data.Semigroup          ((<>))
 import qualified Data.Text
 import qualified Options.Applicative     as Options
 import           Options.Generic

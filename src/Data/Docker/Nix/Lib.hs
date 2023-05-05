@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TupleSections     #-}
-{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE FlexibleContexts  #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -42,7 +42,7 @@ toBase32Nix (Base16Digest d16) = do
   let nixhash       = Nix.Paths.nixHash
   let hockerExc m   = HockerException m Nothing Nothing
   let convertDigest =
-        inprocWithErr
+        procStrictWithErr
           (Text.pack nixhash)
           [ "--type"
           , "sha256"
@@ -58,8 +58,7 @@ toBase32Nix (Base16Digest d16) = do
            "nothing was returned by `nix-hash', not even an error"
            Nothing
             Nothing)
-    Just result ->
-      either
-       (throwError . hockerExc . Text.unpack . lineToText)
-       (return . Base32Digest . lineToText)
-       result
+    Just (ExitFailure _, _, errorText) ->
+      throwError (hockerExc (Text.unpack errorText))
+    Just (ExitSuccess, resultText, _) ->
+      return (Base32Digest (Text.strip resultText))

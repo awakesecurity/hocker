@@ -15,7 +15,6 @@
 module Hocker.Types.ImageTag where
 
 import           Control.DeepSeq
-import           Data.Semigroup      ((<>))
 import qualified Options.Applicative as Options
 import           Options.Generic
 

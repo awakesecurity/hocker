@@ -21,7 +21,6 @@ import           Control.Exception.Lifted  as Lifted
 import           Control.Lens
 import           Control.Monad.Except
 import           Data.ByteString.Char8     as C8
-import           Data.Semigroup            ((<>))
 import           Network.HTTP.Client
 import           Network.HTTP.Types.Status
 

@@ -16,7 +16,6 @@ module Hocker.Types.URI where
 
 import           Control.Lens
 import qualified Data.ByteString.Char8       as C8
-import           Data.Semigroup              ((<>))
 import qualified Data.Text                   as Text
 import qualified Options.Applicative         as Options
 import           Options.Applicative.Builder
@@ -32,12 +31,12 @@ uriReader = Options.eitherReader parseURIArg
 
 instance ParseField (URIRef Absolute) where
   readField = uriReader
-  parseField help long short _value =
+  parseField helpMsg longStr shortStr _value =
       (Options.option uriReader $
        ( Options.metavar "URI"
-       <> foldMap (Options.long  . Text.unpack) long
-       <> foldMap Options.short short
-       <> foldMap (Options.help  . Text.unpack) help
+       <> foldMap (Options.long  . Text.unpack) longStr
+       <> foldMap Options.short shortStr
+       <> foldMap (Options.help  . Text.unpack) helpMsg
        )
       )
 
