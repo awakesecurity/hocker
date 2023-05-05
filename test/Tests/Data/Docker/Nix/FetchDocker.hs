@@ -19,7 +19,7 @@ import           Data.ByteString              as BS
 import           Data.ByteString.Lazy.Char8   as C8L
 import           Data.Either                  (either)
 import qualified Data.Text                    as Text
-import qualified Data.Text.Prettyprint.Doc.Render.String
+import qualified Prettyprint.Render.String
 import           Data.Word8                   as W8
 import           Network.URI
 
@@ -105,7 +105,7 @@ generateFetchDockerNix = do
       , altImageName   = Nothing
       }
 
-  let display = Data.Text.Prettyprint.Doc.Render.String.renderString
+  let display = Prettyprint.Render.String.renderString
 
   either
     (Hocker.Lib.die . Text.pack . show)
