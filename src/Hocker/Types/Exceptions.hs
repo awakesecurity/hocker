@@ -19,7 +19,6 @@ module Hocker.Types.Exceptions where
 
 import           Control.DeepSeq
 import           Control.Exception
-import           Data.Semigroup     ((<>))
 import           GHC.Generics
 
 data HockerException = HockerException
