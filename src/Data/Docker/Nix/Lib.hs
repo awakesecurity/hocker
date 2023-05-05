@@ -61,4 +61,4 @@ toBase32Nix (Base16Digest d16) = do
     Just (ExitFailure _, _, errorText) ->
       throwError (hockerExc (Text.unpack errorText))
     Just (ExitSuccess, resultText, _) ->
-      return (Base32Digest resultText)
+      return (Base32Digest (Text.strip resultText))
