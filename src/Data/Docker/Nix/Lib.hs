@@ -58,7 +58,7 @@ toBase32Nix (Base16Digest d16) = do
            "nothing was returned by `nix-hash', not even an error"
            Nothing
             Nothing)
-    Just (ExitFailure _, errorText, _) ->
+    Just (ExitFailure _, _, errorText) ->
       throwError (hockerExc (Text.unpack errorText))
-    Just (ExitSuccess, _, resultText) ->
+    Just (ExitSuccess, resultText, _) ->
       return (Base32Digest resultText)
