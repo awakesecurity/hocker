@@ -42,9 +42,15 @@ import           Hocker.Types.ImageTag
 import           Text.Megaparsec.Pos          (Pos)
 
 -- | @hnix-0.5.0:inherit@ requires a source location as its final argument.
-inheritAdapter :: FilePath -> Pos -> Pos -> [NKeyName e] -> Binding e
-inheritAdapter sourceName sourceLine sourceColumn ks = Nix.Expr.inherit ks
-#if MIN_VERSION_hnix(0,5,0)
+inheritAdapter :: FilePath -> Pos -> Pos -> [VarName] -> Binding e
+inheritAdapter sourceName sourceLine sourceColumn ks = Nix.Expr.inherit
+                                                         (
+#if !MIN_VERSION_hnix(0,15,0)
+                                                           map StaticKey
+#endif
+                                                           ks
+                                                         )
+#if MIN_VERSION_hnix(0,5,0) && !MIN_VERSION_hnix(0,15,0)
                                                          SourcePos{..}
 #endif
 
@@ -142,12 +148,12 @@ The generated AST, pretty printed, may look similar to the following:
 generateFetchDockerExpr :: HockerImageMeta -> ConfigDigest -> [(Base16Digest, Base32Digest)] -> Either HockerException NExpr
 generateFetchDockerExpr dim@HockerImageMeta{..} configDigest layerDigests = do
   let commonInherits =
-        [ StaticKey "registry"
-        , StaticKey "repository"
-        , StaticKey "imageName"
+        [ "registry"
+        , "repository"
+        , "imageName"
         ]
   let genLayerId i = mkSym . Text.pack $ "layer" <> show i
-  let fetchconfig = mkFetchDockerConfig (inheritAdapter ("generated for " ++ show imageName) (mkPos 1) (mkPos 1) $ ((StaticKey "tag"):commonInherits)) configDigest
+  let fetchconfig = mkFetchDockerConfig (inheritAdapter ("generated for " ++ show imageName) (mkPos 1) (mkPos 1) $ ("tag" : commonInherits)) configDigest
       fetchlayers =
         mkLets
          (mkFetchDockerLayers (inheritAdapter "common inherits" (mkPos 1) (mkPos 1) commonInherits) layerDigests)
@@ -200,7 +206,13 @@ mkFetchDocker HockerImageMeta{..} fetchconfig fetchlayers = do
 mkFetchDockerConfig :: Binding NExpr -> Base32Digest -> NExpr
 mkFetchDockerConfig inherits (Base32Digest digest) =
     mkSym constFetchDockerConfig @@
-          (Fix $ NSet NNonRecursive [ inherits, "sha256" $= (mkStr digest) ])
+          (Fix $ NSet
+#if MIN_VERSION_hnix(0,15,0)
+                   NonRecursive
+#else
+                   NNonRecursive
+#endif
+                   [ inherits, "sha256" $= (mkStr digest) ])
 
 -- | Generate a list of Nix expression ASTs representing
 -- @fetchDockerLayer { ... }@ function calls.
@@ -227,7 +239,12 @@ mkFetchDockerLayers inherits layerDigests =
     mkLayerId i = Text.pack $ "layer" <> show i
     mkFetchLayer (i, ((Base16Digest d16), (Base32Digest d32))) =
       (mkLayerId i) $= (mkSym constFetchDockerLayer @@
-                             (Fix $ NSet NNonRecursive
+                             (Fix $ NSet
+#if MIN_VERSION_hnix(0,15,0)
+                                NonRecursive
+#else
+                                NNonRecursive
+#endif
                                 [ inherits
                                 , "layerDigest" $= (mkStr d16) -- Required in order to perform a registry request
                                 , "sha256"      $= (mkStr d32) -- Required by Nix for fixed output derivations

@@ -2,6 +2,10 @@
 
 ## Unreleased
 ### Changed
+- Breaking: Data.Docker.Nix.FetchDocker.inheritAdapter no longer
+  supports dynamic keys because Nix-Expr-Types.Binding.Inherit
+  no longer supports them as of hnix-0.15.
+- Support hnix-0.15 and hnix-0.16.
 - Support and require optparse-generic-1.4.0 or higher.
 
 ## 1.0.7
