@@ -7,6 +7,7 @@
   no longer supports them as of hnix-0.15.
 - Support hnix-0.15 and hnix-0.16.
 - Support and require optparse-generic-1.4.0 or higher.
+- Support turtle-1.6
 
 ## 1.0.7
 ### Changed
