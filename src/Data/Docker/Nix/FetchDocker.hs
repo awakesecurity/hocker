@@ -55,9 +55,13 @@ inheritAdapter sourceName sourceLine sourceColumn ks = Nix.Expr.inherit
 #endif
 
 -- | @hnix-0.5.0@ omits mkApp.
-#if MIN_VERSION_hnix(0,5,0)
+#if MIN_VERSION_hnix(0,5,0) && !MIN_VERSION_hnix(0,17,0)
 mkApp :: NExpr -> NExpr -> NExpr
 mkApp e = Fix . NBinary NApp e
+#elif MIN_VERSION_hnix(0,17,0)
+-- see: https://github.com/haskell-nix/hnix/pull/1042
+mkApp :: NExpr -> NExpr -> NExpr
+mkApp e = Fix . NApp e
 #endif
 
 {- Example output of the pretty-printed, generated Nix expression AST.
