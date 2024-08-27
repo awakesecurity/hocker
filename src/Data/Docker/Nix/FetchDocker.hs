@@ -54,8 +54,8 @@ inheritAdapter sourceName sourceLine sourceColumn ks = Nix.Expr.inherit
                                                          SourcePos{..}
 #endif
 
--- | @hnix-0.5.0@ omits mkApp.
-#if MIN_VERSION_hnix(0,5,0)
+#if MIN_VERSION_hnix(0,5,0) && !MIN_VERSION_hnix(0,17,0)
+-- | @hnix-0.5.0@ omits mkApp but it was added back in @hnix-0.17.0@
 mkApp :: NExpr -> NExpr -> NExpr
 mkApp e = Fix . NBinary NApp e
 #endif
