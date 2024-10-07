@@ -23,6 +23,7 @@
 module Hocker.Types where
 
 import           Control.Applicative
+import qualified Options.Applicative.Help.Pretty as Doc
 import           Control.Monad.Error.Class
 import qualified Control.Monad.Except       as Except
 import           Control.Monad.IO.Class
@@ -151,12 +152,16 @@ newtype Base32Digest = Base32Digest Text
 newtype Base16Digest = Base16Digest Text
   deriving (Show, Read, Eq)
 
-data Credentials = Basic Username Password | BearerToken Text
+data Credentials = Basic Username Password | BearerToken Text | CredentialsFile FilePath
   deriving (Show)
 
 instance ParseField Credentials where
   readField = Options.readerError "Internal, fatal error: unexpected use of readField"
-  parseField _help _long _short _value = (Basic <$> parseUsername <*> parsePassword) <|> (BearerToken <$> parseToken)
+  parseField _help _long _short _value =
+    (   (Basic <$> parseUsername <*> parsePassword)
+    <|> (BearerToken <$> parseToken)
+    <|> (CredentialsFile <$> parseCredentialFile)
+    )
     where
       parseUsername = Text.pack <$>
         (Options.option Options.str $
@@ -179,8 +184,28 @@ instance ParseField Credentials where
          (  Options.metavar "BEARER TOKEN"
          <> Options.long    "token"
          <> Options.short   't'
-         <> Options.help    "Bearer token retrieved from a call to `docker login` (mutually exclusive to --username and --password)"
+         <> Options.helpDoc (Just $ Doc.vcat
+            [ "Bearer token retrieved from a call to `docker login`"
+            , "(mutually exclusive to --username and --password and --credentials-file)"
+            ])
          )
+        )
+      parseCredentialFile = Options.option Options.str $
+        (  Options.metavar "PATH"
+        <> Options.long    "credentials-file"
+        <> Options.short    'f'
+        <> Options.helpDoc (Just $ Doc.vcat
+            [ "Path to a file containing either:"
+            , ""
+            , "USERNAME=<username>"
+            , "PASSWORD=<password>"
+            , ""
+            , "or"
+            , ""
+            , "BEARER_TOKEN=<token>"
+            , ""
+            , "(mutually exclusive to --username and --password and --token)"
+            ])
         )
 
 instance ParseFields Credentials

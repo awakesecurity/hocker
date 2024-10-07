@@ -5,8 +5,10 @@
 ```shell
 Fetch a docker image from a docker registry without using docker
 
-Usage: hocker-image [--registry URI] ([-u|--username BASIC USERNAME]
-                    [-p|--password BASIC PASSWORD] | [-t|--token BEARER TOKEN])
+Usage: hocker-image [--registry URI]
+                    [(-u|--username BASIC USERNAME)
+                      (-p|--password BASIC PASSWORD) |
+                      (-t|--token BEARER TOKEN) | (-f|--credentials-file PATH)]
                     [--out STRING] IMAGE-NAME IMAGE-TAG
 
 Available options:
@@ -17,7 +19,18 @@ Available options:
   -p,--password BASIC PASSWORD
                            Password part of a basic auth credential
   -t,--token BEARER TOKEN  Bearer token retrieved from a call to `docker login`
-                           (mutually exclusive to --username and --password)
+                           (mutually exclusive to --username and --password and --credentials-file)
+  -f,--credentials-file PATH
+                           Path to a file containing either:
+
+                           USERNAME=<username>
+                           PASSWORD=<password>
+
+                           or
+
+                           BEARER_TOKEN=<token>
+
+                           (mutually exclusive to --username and --password and --token)
   --out STRING             Write content to location
   IMAGE-NAME               Docker image name, e.g: 'debian' in debian:jessie
   IMAGE-TAG                Docker image tag identifier, e.g: 'jessie' in

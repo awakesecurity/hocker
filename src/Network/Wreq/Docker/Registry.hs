@@ -1,11 +1,12 @@
-{-# LANGUAGE LambdaCase        #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE RecordWildCards   #-}
-{-# LANGUAGE MultiWayIf   #-}
-{-# LANGUAGE TupleSections     #-}
-{-# LANGUAGE ViewPatterns      #-}
-{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE LambdaCase          #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE QuasiQuotes         #-}
+{-# LANGUAGE RecordWildCards     #-}
+{-# LANGUAGE MultiWayIf          #-}
+{-# LANGUAGE TupleSections       #-}
+{-# LANGUAGE ViewPatterns        #-}
+{-# LANGUAGE FlexibleContexts    #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -24,6 +25,7 @@
 
 module Network.Wreq.Docker.Registry where
 
+import qualified Control.Exception          as Exception
 import           Control.Lens
 import qualified Control.Monad.Except       as Except
 import           Control.Monad.Reader
@@ -34,9 +36,13 @@ import qualified Data.ByteString.Char8      as C8
 import           Data.Text.Encoding         (decodeUtf8, encodeUtf8)
 import           URI.ByteString
 import           NeatInterpolation
+import           Data.Bifunctor
 import qualified Data.Text                  as Text
+import qualified Data.Text.IO               as Text
 import qualified Network.Wreq               as Wreq
+import qualified Turtle
 import           System.Directory
+import qualified System.IO
 
 import           Data.Docker.Image.Types
 import           Hocker.Lib
@@ -76,12 +82,14 @@ mkAuth :: RegistryURI       -- ^ Docker registry
        -> ImageName         -- ^ Docker image name
        -> Maybe Credentials -- ^ Docker registry authentication credentials
        -> IO (Maybe Wreq.Auth)
-mkAuth reg (ImageName img) credentials =
+mkAuth reg iname@(ImageName img) credentials =
   case credentials of
     Just (BearerToken token)
       -> pure (Just $ Wreq.oauth2Bearer (encodeUtf8 token))
     Just (Basic username password)
       -> pure (Just $ Wreq.basicAuth (encodeUtf8 username) (encodeUtf8 password))
+    Just (CredentialsFile path)
+      -> parseCredentialsFile path >>= mkAuth reg iname . Just
     Nothing | reg /= defaultRegistry
               -> pure Nothing
             | otherwise
@@ -89,6 +97,27 @@ mkAuth reg (ImageName img) credentials =
   where
     getHubToken     = Wreq.get ("https://auth.docker.io/token?service=registry.docker.io&scope=repository:"<>img<>":pull")
     mkHubBearer rsp = (Wreq.oauth2Bearer . encodeUtf8) <$> (rsp ^? Wreq.responseBody . key "token" . _String)
+
+parseCredentialsFile :: FilePath -> IO Credentials
+parseCredentialsFile path = do
+  let parse = do
+        kvs <- Text.readFile path
+          <&> fmap (second (Text.drop 1) . Text.break (== '=')) . Text.lines
+        pure $ case kvs of
+          [(k,v)] | k == "BEARER_TOKEN", v /= "" -> Just $ BearerToken v
+          [(k1,v1),(k2,v2)] | k1 == "USERNAME", v1 /= "", k2 == "PASSWORD", v2 /= "" -> Just $ Basic v1 v2
+          [(k1,v1),(k2,v2)] | k2 == "USERNAME", v2 /= "", k1 == "PASSWORD", v1 /= "" -> Just $ Basic v2 v1
+          _ -> Nothing
+
+  creds <- parse `Exception.catch` \(e :: Exception.IOException) -> do
+    System.IO.hPutStrLn System.IO.stderr "error: while trying to read credentials file..."
+    Exception.throwIO e
+  case creds of
+    Just val -> pure val
+    Nothing -> do
+      System.IO.hPutStrLn System.IO.stderr "error: could not parse credentials file"
+      Turtle.exit (Turtle.ExitFailure 1)
+
 
 -- | Retrieve a list of layer hash digests from a docker registry
 -- image manifest JSON.

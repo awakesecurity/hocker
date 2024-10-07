@@ -5,9 +5,10 @@
 - Breaking: Data.Docker.Nix.FetchDocker.inheritAdapter no longer
   supports dynamic keys because Nix-Expr-Types.Binding.Inherit
   no longer supports them as of hnix-0.15.
-- Support hnix-0.15 and hnix-0.16.
+- Support hnix-0.15, hnix-0.16, and hnix-0.17.
 - Support and require optparse-generic-1.4.0 or higher.
-- Support turtle-1.6
+- Support turtle-1.6 and turtle
+- Add the `--credentials-file` option to allow passing credentials as a file.
 
 ## 1.0.7
 ### Changed
