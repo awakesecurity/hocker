@@ -102,6 +102,17 @@ request to the public docker hub registry, in which case they ask for a
 short-lived authentication token from the registry auth server and then make the
 request to the public docker hub registry.
 
+Both types of credential may instead be passed as file using `--credential-file`.
+The credential file should contain either:
+```
+USERNAME=<username>
+PASSWORD=<password>
+```
+or
+```
+BEARER_TOKEN=<token>
+```
+
 ## How to build
 
 Building (and developing a patch for) this project using `cabal` is
