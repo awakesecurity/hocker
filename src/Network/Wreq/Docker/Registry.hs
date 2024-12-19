@@ -27,6 +27,7 @@ module Network.Wreq.Docker.Registry where
 
 import qualified Control.Exception          as Exception
 import           Control.Lens
+import           Control.Monad              (when)
 import qualified Control.Monad.Except       as Except
 import           Control.Monad.Reader
 import qualified Crypto.Hash                as Hash
@@ -143,17 +144,27 @@ pluckRefLayersFrom = toListOf (key "rootfs" . key "diff_ids" . values . _String)
 
 -- | Request a V2 registry manifest for the specified docker image.
 fetchManifest :: Hocker RspBS
-fetchManifest = ask >>= \HockerMeta{..} ->
-  liftIO $ Wreq.getWith (opts auth & accept) (mkURL imageName imageTag dockerRegistry)
+fetchManifest = ask >>= \HockerMeta{..} -> do
+  resp <- liftIO $ Wreq.getWith (opts auth & accept) (mkURL imageName imageTag dockerRegistry)
+  case resp ^. Wreq.responseHeader "Content-Type" of
+    "application/vnd.docker.distribution.manifest.list.v2+json" ->
+      case findOf
+             folded
+             (\m -> m ^. key "platform" . key "architecture" . _String == imageArch)
+             (resp ^. Wreq.responseBody . key "manifests" . _Array) of
+        Just m -> local (\_ -> HockerMeta {imageTag = ImageTag (m ^. key "digest" . _String . to Text.unpack), ..}) fetchManifest
+        Nothing -> error "No manifest found for required architecture"
+    _ -> pure resp
   where
     mkURL (ImageName n) (ImageTag t) r = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "manifests", t] r)
     accept = Wreq.header "Accept" .~
-      [ "application/vnd.docker.distribution.manifest.v2+json" ]
+      [ "application/vnd.docker.distribution.manifest.v2+json"
+      , "application/vnd.docker.distribution.manifest.list.v2+json" ]
 
 -- | Retrieve the configuratino JSON of an image by its hash digest
 -- (found in the V2 manifest for an image given by a name and a tag).
 fetchImageConfig :: (Hash.Digest Hash.SHA256) -> Hocker RspBS
-fetchImageConfig (showSHA -> digest) = ask >>= \HockerMeta{..} ->
+fetchImageConfig (showSHA -> digest) = ask >>= \HockerMeta{..} -> do
   liftIO $ Wreq.getWith (opts auth) (mkURL imageName dockerRegistry)
   where
     mkURL (ImageName n) r = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "blobs", digest] r)
