@@ -25,7 +25,6 @@ module Main where
 
 import           Data.ByteString.Lazy.Char8   as C8L
 import           Data.Maybe                   (fromMaybe)
-import           Data.Text                    (Text)
 import           Options.Generic
 import           System.IO                    (hWaitForInput, stdin)
 
