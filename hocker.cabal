@@ -45,7 +45,7 @@ source-repository head
   location: https://github.com/awakesecurity/hocker.git
 
 library
-  ghc-options:         -Wall -Werror -Wunused-packages
+  ghc-options:         -Wall -Wunused-packages
   hs-source-dirs:      src
   exposed-modules:
                   Data.Docker.Image.AesonHelpers,

@@ -29,6 +29,7 @@ import qualified Control.Exception          as Exception
 import           Control.Lens
 import qualified Control.Monad.Except       as Except
 import           Control.Monad.Reader
+import           Control.Monad              (when)
 import qualified Crypto.Hash                as Hash
 import           Data.Aeson.Lens
 import           Data.ByteString.Lazy.Char8 as C8L
