@@ -19,7 +19,6 @@ import qualified Codec.Archive.Tar                 as Tar
 import qualified Codec.Compression.GZip            as GZip
 import qualified Control.Concurrent.PooledIO.Final as Pool
 import           Control.Lens
-import           Control.Monad.Except
 import           Control.Monad.Reader
 import qualified Data.ByteString.Lazy.Char8        as C8L
 import           Data.Coerce
