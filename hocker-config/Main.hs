@@ -30,6 +30,7 @@ progSummary = "Fetch a docker image config JSON from the registry"
 main :: IO ()
 main = unwrapRecord progSummary >>= \Options{..} -> do
   let dockerRegistry = fromMaybe defaultRegistry registry
+      imageArch      = fromMaybe systemArch arch
 
   auth   <- mkAuth dockerRegistry imageName credentials
   config <- Docker.Image.fetchConfig $

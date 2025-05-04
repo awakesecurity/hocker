@@ -37,6 +37,7 @@ import qualified Network.Wreq               as Wreq
 import           Network.Wreq.ErrorHandling
 import qualified Options.Applicative        as Options
 import           Options.Generic
+import qualified System.Info                as Info (arch)
 import           URI.ByteString
 
 import           Hocker.Types.Exceptions
@@ -89,6 +90,10 @@ type ImageNamePart   = Text
 -- (i.e, they're not compatible).
 type ConfigDigest    = Base32Digest
 
+-- |Architecture of docker image. This is required when manifests api returns
+-- a V2 Schema 2 list of manifests for different architecture
+type Arch            = Text
+
 -- | Generic top-level optparse-generic CLI args data type and
 -- specification.
 --
@@ -103,6 +108,9 @@ data Options w = Options
     , out         :: w ::: Maybe FilePath
       <?> "Write content to location"
       -- | Docker image name (includes the reponame, e.g: library/debian)
+    , arch        :: w ::: Maybe Arch
+    <?> "Image architecture to pick, defaults to current architecture"
+    -- | Docker image architecture, amd64, arm64, etc.,
     , imageName   :: ImageName
       -- | Docker image tag
     , imageTag    :: ImageTag
@@ -136,6 +144,7 @@ data HockerMeta = HockerMeta
     , out            :: Maybe FilePath
     , outDir         :: Maybe FilePath
     , imageLayer     :: Maybe (Hash.Digest Hash.SHA256)
+    , imageArch      :: Arch
     } deriving (Show)
 
 -- | Newtype base32 encoding of a hash digest.
@@ -216,3 +225,19 @@ instance ParseRecord Credentials where
 upperFirst :: String -> String
 upperFirst []    = []
 upperFirst (h:t) = toUpper h : t
+
+-- |Converts 'arch' from System.Info to the arch string expected by Docker
+-- See valid values fro "$GOARCH" in https://go.dev/doc/install/source#environment
+systemArch :: Arch
+systemArch =
+  case Info.arch of
+    "aarch64" -> "amd64"
+    "arm"     -> "arm"
+    "i386"    -> "386"
+    "mips"    -> "mips"
+    "mipseb"  -> "mipsle"
+    "mipsel"  -> "mipsle"
+    "powerpc64" -> "ppc64"
+    "powerpc64le" -> "ppc64le"
+    "x86_64"      -> "amd64"
+    unknownArch   -> error ("Unknown architecture: " <> unknownArch)
