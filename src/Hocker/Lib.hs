@@ -28,6 +28,7 @@ import           Data.Aeson.Lens
 import qualified Data.ByteString.Char8        as C8
 import           Data.ByteString.Lazy.Char8   as C8L
 import           Data.Coerce
+import           Data.Default                 (def)
 import           Data.Text                    (Text)
 import qualified Data.Text                    as Text
 import           Prettyprinter                (LayoutOptions(..),
@@ -35,6 +36,10 @@ import           Prettyprinter                (LayoutOptions(..),
 import qualified Prettyprinter
 import qualified Prettyprinter.Render.Text
 import           Data.Text.Encoding           (encodeUtf8)
+import           Network.Connection           (TLSSettings(TLSSettingsSimple))
+import           Network.TLS                  (Supported(..), EMSMode(..))
+import           Network.HTTP.Client          (ManagerSettings)
+import           Network.HTTP.Client.TLS      (mkManagerSettings)
 import qualified Network.Wreq                 as Wreq
 import           Nix.Expr                     (NExpr)
 import           Nix.Pretty
@@ -110,9 +115,14 @@ joinURIPath pts uri@URI{..} = uri { uriPath = joinedParts }
   where
     joinedParts = C8.pack $ File.joinPath ("/":"v2":(C8.unpack uriPath):pts)
 
--- | Given a 'Wreq.Auth' produce a 'Wreq.Options'.
-opts :: Maybe Wreq.Auth -> Wreq.Options
-opts bAuth = Wreq.defaults & Wreq.auth .~ bAuth
+-- | Given a 'Wreq.Auth' and `ManagerSettings` produce a 'Wreq.Options'.
+opts :: Maybe Wreq.Auth -> ManagerSettings -> Wreq.Options
+opts bAuth managerSettings = Wreq.defaults & Wreq.auth .~ bAuth & Wreq.manager .~ Left managerSettings
+
+defaultManager :: ManagerSettings
+defaultManager = mkManagerSettings tlsSettings Nothing
+  where
+    tlsSettings = TLSSettingsSimple False False False def{supportedExtendedMainSecret = AllowEMS}
 
 -- | Hash a 'Data.ByteString.Lazy.Char8' using the 'Hash.SHA256'
 -- algorithm.

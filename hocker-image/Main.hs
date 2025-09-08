@@ -39,6 +39,7 @@ main = unwrapRecord progSummary >>= \Options{..} -> do
       HockerMeta
         { outDir     = Just d
         , imageLayer = Nothing
+        , manager    = defaultManager
         , ..
         }
   either (Hocker.Lib.exitProgFail . show) TIO.putStrLn img

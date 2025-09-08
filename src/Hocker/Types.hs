@@ -33,6 +33,7 @@ import qualified Crypto.Hash                as Hash
 import qualified Data.ByteString.Lazy
 import           Data.Char                  (toUpper)
 import qualified Data.Text                  as Text
+import           Network.HTTP.Client        (ManagerSettings)
 import qualified Network.Wreq               as Wreq
 import           Network.Wreq.ErrorHandling
 import qualified Options.Applicative        as Options
@@ -131,12 +132,13 @@ runHocker (unHocker -> d) = Except.runExceptT . interceptHttpExc . Reader.runRea
 data HockerMeta = HockerMeta
     { dockerRegistry :: RegistryURI
     , auth           :: Maybe Wreq.Auth
+    , manager        :: ManagerSettings
     , imageName      :: ImageName
     , imageTag       :: ImageTag
     , out            :: Maybe FilePath
     , outDir         :: Maybe FilePath
     , imageLayer     :: Maybe (Hash.Digest Hash.SHA256)
-    } deriving (Show)
+    }
 
 -- | Newtype base32 encoding of a hash digest.
 --
