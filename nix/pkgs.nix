@@ -1,8 +1,8 @@
 let
-  # "nixos-unstable" as on 2024-12-02
-  rev = "ac35b104800bff9028425fec3b6e8a41de2bbfff";
+  # "nixos-unstable" as on 2025-09-07
+  rev = "8eb28adfa3dc4de28e792e3bf49fcf9007ca8ac9";
 
-  sha256 = "sha256:1fbj7shlmviilmgz5z2gp59j6xwgdr01jfh75qhixx06kib4305p";
+  sha256 = "sha256:0vi9nycvag2a9142n6gi5migp7fl5wdzsi1xk8p8542ki2sd9sil";
 
   nixpkgs = builtins.fetchTarball {
     url = "https://github.com/NixOS/nixpkgs/archive/${rev}.tar.gz";

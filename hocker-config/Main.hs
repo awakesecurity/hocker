@@ -36,6 +36,7 @@ main = unwrapRecord progSummary >>= \Options{..} -> do
     HockerMeta
       { outDir     = Nothing
       , imageLayer = Nothing
+      , manager    = defaultManager
       , ..
       }
   either (Hocker.Lib.exitProgFail . show) (Hocker.Lib.writeOrPrint out) config

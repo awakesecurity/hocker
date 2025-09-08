@@ -67,6 +67,7 @@ main = unwrapRecord progSummary >>= \ProgArgs{..} -> do
     HockerMeta
       { outDir     = Nothing
       , imageLayer = Just imageLayer
+      , manager    = defaultManager
       , ..
       }
   either (Hocker.Lib.exitProgFail . show) Prelude.putStrLn layerPath

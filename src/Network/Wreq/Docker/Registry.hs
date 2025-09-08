@@ -145,7 +145,7 @@ pluckRefLayersFrom = toListOf (key "rootfs" . key "diff_ids" . values . _String)
 -- | Request a V2 registry manifest for the specified docker image.
 fetchManifest :: Hocker RspBS
 fetchManifest = ask >>= \HockerMeta{..} ->
-  liftIO $ Wreq.getWith (opts auth & accept) (mkURL imageName imageTag dockerRegistry)
+  liftIO $ Wreq.getWith (opts auth manager & accept) (mkURL imageName imageTag dockerRegistry)
   where
     mkURL (ImageName n) (ImageTag t) r = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "manifests", t] r)
     accept = Wreq.header "Accept" .~
@@ -155,7 +155,7 @@ fetchManifest = ask >>= \HockerMeta{..} ->
 -- (found in the V2 manifest for an image given by a name and a tag).
 fetchImageConfig :: (Hash.Digest Hash.SHA256) -> Hocker RspBS
 fetchImageConfig (showSHA -> digest) = ask >>= \HockerMeta{..} ->
-  liftIO $ Wreq.getWith (opts auth) (mkURL imageName dockerRegistry)
+  liftIO $ Wreq.getWith (opts auth manager) (mkURL imageName dockerRegistry)
   where
     mkURL (ImageName n) r = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "blobs", digest] r)
 
@@ -165,7 +165,7 @@ fetchImageConfig (showSHA -> digest) = ask >>= \HockerMeta{..} ->
 -- we can stream downloads.
 fetchLayer :: Layer -> Hocker RspBS
 fetchLayer layer = ask >>= \HockerMeta{..} ->
-  liftIO $ Wreq.getWith (opts auth) (mkURL layer imageName dockerRegistry)
+  liftIO $ Wreq.getWith (opts auth manager) (mkURL layer imageName dockerRegistry)
   where
     mkURL
       (Text.unpack -> digest)
