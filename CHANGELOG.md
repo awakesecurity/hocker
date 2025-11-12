@@ -9,6 +9,8 @@
 - Support and require optparse-generic-1.4.0 or higher.
 - Support turtle-1.6 and turtle
 - Add the `--credentials-file` option to allow passing credentials as a file.
+- Test with GHC 9.4, 9.6, 9.8, 9.10, 9.12
+- Switch from cryptonite to crypton
 
 ## 1.0.7
 ### Changed
