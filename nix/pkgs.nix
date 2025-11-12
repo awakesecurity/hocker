@@ -1,9 +1,9 @@
 { compiler ? "ghc910" }:
 let
-  # "nixos-unstable" as on 2024-12-02
-  rev = "ac35b104800bff9028425fec3b6e8a41de2bbfff";
+  # "nixos-unstable" as on 2025-11-12
+  rev = "9da7f1cf7f8a6e2a7cb3001b048546c92a8258b4";
 
-  sha256 = "sha256:1fbj7shlmviilmgz5z2gp59j6xwgdr01jfh75qhixx06kib4305p";
+  sha256 = "sha256:04h7cq8rp8815xb4zglkah4w6p2r5lqp7xanv89yxzbmnv29np2a";
 
   nixpkgs = builtins.fetchTarball {
     url = "https://github.com/NixOS/nixpkgs/archive/${rev}.tar.gz";
