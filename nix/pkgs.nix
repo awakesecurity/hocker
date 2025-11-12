@@ -1,3 +1,4 @@
+{ compiler ? "ghc910" }:
 let
   # "nixos-unstable" as on 2024-12-02
   rev = "ac35b104800bff9028425fec3b6e8a41de2bbfff";
@@ -13,6 +14,6 @@ in
 import nixpkgs {
   config = { allowUnfree = true; };
   overlays = [
-    (import ./overlays/haskell-packages.nix)
+    (import ./overlays/haskell-packages.nix { inherit compiler; })
   ];
 }

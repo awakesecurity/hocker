@@ -1,5 +1,6 @@
+{ compiler ? "ghc910" }:
 let
-  pkgs = import ./nix/pkgs.nix;
+  pkgs = import ./nix/pkgs.nix { inherit compiler; };
 
   hocker = pkgs.haskellPackages.hocker;
 

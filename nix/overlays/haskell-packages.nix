@@ -1,3 +1,4 @@
+{ compiler }:
 pkgsFinal: pkgsPrev:
 
 let
@@ -7,8 +8,8 @@ let
 
 in
 {
-  haskellPackages =
-    pkgsPrev.haskellPackages.override (old: {
+  haskellPackages = 
+    pkgsPrev.haskell.packages.${compiler}.override (old: {
       overrides =
         pkgsPrev.lib.fold
           pkgsPrev.lib.composeExtensions
