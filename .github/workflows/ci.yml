@@ -5,8 +5,19 @@ on:
       - master
   pull_request:
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        compiler:
+          - ghc94
+          - ghc96
+          - ghc98
+          - ghc910
+          - ghc912
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3.0.2
         name: Checkout
@@ -20,21 +31,4 @@ jobs:
           name: awakesecurity
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix-build
-        name: nix-build
-
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3.0.2
-        name: Checkout
-      - uses: cachix/install-nix-action@v20
-        name: Install Nix
-        with:
-          nix_path: nixpkgs=./nix/pkgs.nix
-      - uses: cachix/cachix-action@v12
-        name: Set up Cachix
-        with:
-          name: awakesecurity
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - run: nix-build
-        name: nix-build
+        name: nix-build --argstr compiler "${{ matrix.compiler }}"
