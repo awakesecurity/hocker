@@ -70,7 +70,7 @@ library
                 aeson-pretty         >= 0.8,
                 bytestring           >= 0.10,
                 concurrentoutput     >= 0.2,
-                cryptonite           >= 0.13,
+                crypton              >= 0.32,
                 data-fix             >= 0.0.3,
                 deepseq              >= 1.4,
                 directory            >= 1.2.2.0,
@@ -120,7 +120,7 @@ executable hocker-layer
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Werror -Wunused-packages
   build-depends:
                 base                 >= 4.9 && < 5,
-                cryptonite           >= 0.13,
+                crypton              >= 0.32,
                 hocker,
                 optparse-generic     >= 1.2.0,
                 text                 >= 1.2
