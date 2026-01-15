@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE QuasiQuotes         #-}
 {-# LANGUAGE RecordWildCards     #-}
+{-# LANGUAGE NamedFieldPuns      #-}
 {-# LANGUAGE MultiWayIf          #-}
 {-# LANGUAGE TupleSections       #-}
 {-# LANGUAGE ViewPatterns        #-}
@@ -40,7 +41,10 @@ import           NeatInterpolation
 import           Data.Bifunctor
 import qualified Data.Text                  as Text
 import qualified Data.Text.IO               as Text
+import           Network.HTTP.Client        (throwErrorStatusCodes)
+import qualified Network.HTTP.Types.Header  as HttpHeader
 import qualified Network.Wreq               as Wreq
+import qualified Network.Wreq.Types         as Wreq.Types
 import qualified Turtle
 import           System.Directory
 import qualified System.IO
@@ -48,6 +52,7 @@ import qualified System.IO
 import           Data.Docker.Image.Types
 import           Hocker.Lib
 import           Hocker.Types
+import           Hocker.Types.AuthInfo
 import           Hocker.Types.Exceptions
 import           Hocker.Types.ImageName
 import           Hocker.Types.ImageTag
@@ -81,23 +86,18 @@ defaultRegistry = URI
 -- be made.
 mkAuth :: RegistryURI       -- ^ Docker registry
        -> ImageName         -- ^ Docker image name
+       -> ImageTag          -- ^ Docker image tag
        -> Maybe Credentials -- ^ Docker registry authentication credentials
        -> IO (Maybe Wreq.Auth)
-mkAuth reg iname@(ImageName img) credentials =
+mkAuth reg imageName imageTag credentials =
   case credentials of
     Just (BearerToken token)
       -> pure (Just $ Wreq.oauth2Bearer (encodeUtf8 token))
     Just (Basic username password)
       -> pure (Just $ Wreq.basicAuth (encodeUtf8 username) (encodeUtf8 password))
     Just (CredentialsFile path)
-      -> parseCredentialsFile path >>= mkAuth reg iname . Just
-    Nothing | reg /= defaultRegistry
-              -> pure Nothing
-            | otherwise
-              -> getHubToken >>= pure . mkHubBearer
-  where
-    getHubToken     = Wreq.get ("https://auth.docker.io/token?service=registry.docker.io&scope=repository:"<>img<>":pull")
-    mkHubBearer rsp = (Wreq.oauth2Bearer . encodeUtf8) <$> (rsp ^? Wreq.responseBody . key "token" . _String)
+      -> parseCredentialsFile path >>= mkAuth reg imageName imageTag . Just
+    Nothing -> anonymousAuth reg imageName imageTag
 
 parseCredentialsFile :: FilePath -> IO Credentials
 parseCredentialsFile path = do
@@ -118,6 +118,32 @@ parseCredentialsFile path = do
     Nothing -> do
       System.IO.hPutStrLn System.IO.stderr "error: could not parse credentials file"
       Turtle.exit (Turtle.ExitFailure 1)
+
+getAnonymousToken :: AuthInfo -> IO Wreq.Auth
+getAnonymousToken AuthInfo{realm, service, scope} = do
+  let url = over (queryL . queryPairsL) (++ [("service", service), ("scope", scope)]) realm
+  rsp <- Wreq.get $ C8.unpack $ serializeURIRef' url
+  let token = rsp ^. Wreq.responseBody . key "token" . _String
+  pure $ Wreq.oauth2Bearer $ encodeUtf8 token
+
+anonymousAuth :: RegistryURI -> ImageName -> ImageTag -> IO (Maybe Wreq.Auth)
+anonymousAuth reg imageName imageTag = do
+  -- Don't throw on 401
+  let customRc :: Wreq.Types.ResponseChecker
+      customRc _ resp
+        | resp ^. Wreq.responseStatus . Wreq.statusCode == 401 = return ()
+      customRc req resp = throwErrorStatusCodes req resp
+
+  let noThrowOpts = Wreq.defaults & Wreq.checkResponse .~ Just customRc
+  rsp <- Wreq.headWith noThrowOpts $ mkManifestURL reg imageName imageTag
+
+  case rsp ^. Wreq.responseStatus ^. Wreq.statusCode of
+    401 -> do           -- Need to get anonymous token from endpoint in WWW-Authenticate
+      let wwwAuthHeader = rsp ^. Wreq.responseHeader HttpHeader.hWWWAuthenticate
+      authInfo <- either Exception.throwIO pure (parseWWWAuthHeader wwwAuthHeader)
+      token <- getAnonymousToken authInfo
+      pure $ Just token
+    _   -> pure Nothing -- No token needed, should be only 2xx based on customRc above
 
 
 -- | Retrieve a list of layer hash digests from a docker registry
@@ -142,12 +168,14 @@ pluckRefLayersFrom = toListOf (key "rootfs" . key "diff_ids" . values . _String)
 -----------------------------------------------------------------------------
 -- Top-level docker-registry V2 REST interface functions
 
+mkManifestURL :: RegistryURI -> ImageName -> ImageTag -> String
+mkManifestURL r (ImageName n) (ImageTag t) = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "manifests", t] r)
+
 -- | Request a V2 registry manifest for the specified docker image.
 fetchManifest :: Hocker RspBS
 fetchManifest = ask >>= \HockerMeta{..} ->
-  liftIO $ Wreq.getWith (opts auth & accept) (mkURL imageName imageTag dockerRegistry)
+  liftIO $ Wreq.getWith (opts auth & accept) (mkManifestURL dockerRegistry imageName imageTag)
   where
-    mkURL (ImageName n) (ImageTag t) r = C8.unpack (serializeURIRef' $ Hocker.Lib.joinURIPath [n, "manifests", t] r)
     accept = Wreq.header "Accept" .~
       [ "application/vnd.docker.distribution.manifest.v2+json" ]
 

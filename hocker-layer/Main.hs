@@ -62,7 +62,7 @@ main :: IO ()
 main = unwrapRecord progSummary >>= \ProgArgs{..} -> do
   let dockerRegistry = fromMaybe defaultRegistry registry
 
-  auth      <- mkAuth dockerRegistry imageName credentials
+  auth      <- mkAuth dockerRegistry imageName imageTag credentials
   layerPath <- Docker.Image.fetchLayer $
     HockerMeta
       { outDir     = Nothing
