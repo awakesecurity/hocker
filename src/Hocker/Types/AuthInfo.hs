@@ -16,11 +16,13 @@ module Hocker.Types.AuthInfo (
 ) where
 
 import           Control.Applicative          ((<|>))
+import           Data.Bifunctor               (first)
 import qualified Data.ByteString.Char8        as C8
 import qualified Data.CaseInsensitive         as CI
 import           Data.Char                    (isAlphaNum, ord)
 import           Data.Maybe                   (listToMaybe, mapMaybe)
-import           URI.ByteString
+import           URI.ByteString               (Absolute, URIRef, parseURI, strictURIParserOptions)
+import           Text.Read                    (readEither)
 import           Text.ParserCombinators.ReadP
 
 import           Hocker.Types.Exceptions
@@ -148,15 +150,14 @@ challenges = do
   _ <- many $ (char ',' >> ows)
   return cs
 
-parseChallenges :: String -> Either HockerException [Challenge]
-parseChallenges headerVal = 
-  case readP_to_S (challenges <* eof) headerVal of
-    ((result, "") : _) -> Right result
-    _                  -> Left $ hockerException ("Invalid WWW-Authenticate header: '" <> headerVal <> "'")
+newtype WWWAuthHeader = WWWAuthHeader [Challenge]
+
+instance Read WWWAuthHeader where
+  readsPrec _ = readP_to_S $ WWWAuthHeader <$> (challenges <* eof)
 
 parseWWWAuthHeader :: C8.ByteString -> Either HockerException AuthInfo
 parseWWWAuthHeader headerValue = do
-  parsedChallenges <- parseChallenges $ C8.unpack headerValue
+  WWWAuthHeader parsedChallenges <- first hockerException $ readEither $ C8.unpack headerValue
 
   maybe notFoundErr Right $ listToMaybe $ mapMaybe transform parsedChallenges
         where
