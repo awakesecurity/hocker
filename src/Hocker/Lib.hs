@@ -35,6 +35,9 @@ import           Prettyprinter                (LayoutOptions(..),
 import qualified Prettyprinter
 import qualified Prettyprinter.Render.Text
 import           Data.Text.Encoding           (encodeUtf8)
+import           Network.HTTP.Client          (ManagerSettings(managerModifyRequest),
+                                               Request(shouldStripHeaderOnRedirect))
+import           Network.HTTP.Client.TLS      (tlsManagerSettings)
 import qualified Network.Wreq                 as Wreq
 import           Nix.Expr                     (NExpr)
 import           Nix.Pretty
@@ -112,7 +115,14 @@ joinURIPath pts uri@URI{..} = uri { uriPath = joinedParts }
 
 -- | Given a 'Wreq.Auth' produce a 'Wreq.Options'.
 opts :: Maybe Wreq.Auth -> Wreq.Options
-opts bAuth = Wreq.defaults & Wreq.auth .~ bAuth
+opts bAuth = Wreq.defaults
+               & Wreq.auth .~ bAuth
+               & Wreq.manager .~
+                   (Left tlsManagerSettings{managerModifyRequest =
+                                              pure . stripAuthHeader})
+  where
+    stripAuthHeader request =
+      request{shouldStripHeaderOnRedirect = (== "Authorization")}
 
 -- | Hash a 'Data.ByteString.Lazy.Char8' using the 'Hash.SHA256'
 -- algorithm.

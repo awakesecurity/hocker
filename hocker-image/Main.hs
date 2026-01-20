@@ -32,6 +32,7 @@ progSummary = "Fetch a docker image from a docker registry without using docker"
 main :: IO ()
 main = unwrapRecord progSummary >>= \Options{..} -> do
   let dockerRegistry = fromMaybe defaultRegistry registry
+      imageArch      = fromMaybe systemArch arch
 
   auth <- mkAuth dockerRegistry imageName credentials
   img  <- withSystemTempDirectory "hocker-image-XXXXXX" $ \d ->

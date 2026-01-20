@@ -30,6 +30,7 @@ progSummary = "Pull a docker image manifest from the registry"
 main :: IO ()
 main = unwrapRecord progSummary >>= \Options{..} -> do
   let dockerRegistry =  fromMaybe defaultRegistry registry
+      imageArch      =  fromMaybe systemArch arch
 
   auth     <- mkAuth dockerRegistry imageName credentials
   manifest <- Docker.Image.fetchImageManifest $
