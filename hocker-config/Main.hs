@@ -31,7 +31,7 @@ main :: IO ()
 main = unwrapRecord progSummary >>= \Options{..} -> do
   let dockerRegistry = fromMaybe defaultRegistry registry
 
-  auth   <- mkAuth dockerRegistry imageName credentials
+  auth   <- mkAuth dockerRegistry imageName imageTag credentials
   config <- Docker.Image.fetchConfig $
     HockerMeta
       { outDir     = Nothing

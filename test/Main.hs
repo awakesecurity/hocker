@@ -6,6 +6,7 @@ import           Test.Tasty.HUnit
 
 import qualified Tests.Data.Docker.Image           as Docker.Image
 import qualified Tests.Data.Docker.Nix.FetchDocker as FetchDockerTests
+import qualified Tests.Hocker.Types.AuthInfo       as AuthInfoTests
 
 main :: IO ()
 main = defaultMain tests
@@ -14,4 +15,5 @@ tests :: TestTree
 tests = testGroup "Tests"
   [ Docker.Image.unitTests
   , FetchDockerTests.tests
+  , AuthInfoTests.tests
   ]

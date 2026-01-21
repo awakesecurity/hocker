@@ -25,7 +25,7 @@ data HockerException = HockerException
   { baseMsg  :: String
   , expected :: Maybe String
   , received :: Maybe String
-  } deriving (Read, Generic, NFData)
+  } deriving (Eq, Read, Generic, NFData)
 
 instance Exception HockerException
 instance Show HockerException where
