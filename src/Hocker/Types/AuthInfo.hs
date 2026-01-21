@@ -20,7 +20,10 @@ import           Data.Bifunctor               (first)
 import qualified Data.ByteString.Char8        as C8
 import qualified Data.CaseInsensitive         as CI
 import           Data.Char                    (isAlphaNum, ord)
-import           Data.Maybe                   (listToMaybe, mapMaybe)
+import           Data.Either                  (partitionEithers)
+import           Data.List                    (intercalate)
+import           Data.List.NonEmpty           (NonEmpty)
+import qualified Data.List.NonEmpty           as NonEmpty
 import           URI.ByteString               (Absolute, URIRef, parseURI, strictURIParserOptions)
 import           Text.Read                    (readEither)
 import           Text.ParserCombinators.ReadP
@@ -143,7 +146,7 @@ challenge = do
   return $ Challenge s ps
 
 -- WWW-Authenticate = *( "," OWS ) challenge *( OWS "," [ OWS challenge ] )
-challenges :: ReadP [Challenge]
+challenges :: ReadP (NonEmpty Challenge)
 challenges = do
   -- The header can start with an "empty" challenge
   _ <- munch (\c -> isWhitespace c || c == ',')
@@ -151,29 +154,38 @@ challenges = do
   cs <- sepBy1 challenge sepByAtLeastComma
   -- It can also end with "empty" challenges
   _ <- munch (\c -> isWhitespace c || c == ',')
-  return cs
+  return (NonEmpty.fromList cs)
 
-newtype WWWAuthHeader = WWWAuthHeader [Challenge]
+newtype WWWAuthHeader = WWWAuthHeader (NonEmpty Challenge)
 
 instance Read WWWAuthHeader where
   readsPrec _ = readP_to_S $ WWWAuthHeader <$> (challenges <* eof)
+
+challengeToAuthInfo :: Challenge -> Either String AuthInfo
+challengeToAuthInfo c
+  | scheme c /= AuthScheme (CI.mk "bearer") = Left "Only Bearer challenges are supported"
+  | otherwise = case params c of
+      AuthParamsArr ps -> do
+        let lookupKey key = case lookup (CI.mk key) ps of
+              Just value -> Right $ C8.pack value
+              Nothing    -> Left $ "Key '" <> key <> "' is missing"
+  
+        rawRealm <- lookupKey "realm"
+        service  <- lookupKey "service"
+        scope    <- lookupKey "scope"
+
+        realm <- first (\e -> "Failed to parse realm as an absolute URL: " <> show e) $ parseURI strictURIParserOptions rawRealm
+        Right AuthInfo{ realm, service, scope }
+      
+      AuthParamsB64 _ -> Left "Base64 auth params are not supported"
 
 parseWWWAuthHeader :: C8.ByteString -> Either HockerException AuthInfo
 parseWWWAuthHeader headerValue = do
   WWWAuthHeader parsedChallenges <- first hockerException $ readEither $ C8.unpack headerValue
 
-  maybe notFoundErr Right $ listToMaybe $ mapMaybe transform parsedChallenges
-        where
-          notFoundErr = Left $ hockerException "Unable to extract AuthInfo from WWW-Authentication header"
-          transform c
-            | scheme c /= AuthScheme (CI.mk "bearer") = Nothing
-            | otherwise = case params c of
-                AuthParamsArr ps -> do
-                  rawRealm <- C8.pack <$> lookup (CI.mk "realm") ps
-                  service  <- C8.pack <$> lookup (CI.mk "service") ps
-                  scope    <- C8.pack <$> lookup (CI.mk "scope") ps
+  -- We take the first parsed AuthInfo we find. In case of multiple valid Bearer challenges we ignore the later ones.
+  let collectErrors xs = case partitionEithers $ NonEmpty.toList xs of
+          (_, authInfo:_) -> Right authInfo
+          (errors, _)     -> Left $ hockerException ("Unable to extract AuthInfo from WWW-Authentication header:\n\t" <> intercalate "\n\t" errors)
 
-                  realm <- either (\_ -> Nothing) Just $ parseURI strictURIParserOptions rawRealm
-                  pure AuthInfo{ realm, service, scope }
-                
-                AuthParamsB64 _ -> Nothing -- Not supported for now
+  collectErrors $ NonEmpty.map challengeToAuthInfo parsedChallenges
