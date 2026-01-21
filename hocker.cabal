@@ -176,7 +176,8 @@ test-suite hocker-tests
   main-is:             Main.hs
   other-modules:
                 Tests.Data.Docker.Image,
-                Tests.Data.Docker.Nix.FetchDocker
+                Tests.Data.Docker.Nix.FetchDocker,
+                Tests.Hocker.Types.AuthInfo
   build-depends:
                 base                 >= 4.9 && < 5,
                 aeson                >= 0.9.0.1,
@@ -190,6 +191,7 @@ test-suite hocker-tests
                 tasty-hunit          >= 0.9,
                 text                 >= 1.2,
                 unordered-containers >= 0.2,
+                uri-bytestring       >= 0.2,
                 word8                >= 0.1.0
 
 

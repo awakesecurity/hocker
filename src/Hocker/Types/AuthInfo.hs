@@ -33,6 +33,7 @@ data AuthInfo = AuthInfo
   , service :: C8.ByteString
   , scope   :: C8.ByteString
   }
+  deriving (Show, Eq)
 
 newtype AuthScheme = AuthScheme (CI.CI String)
   deriving (Show, Eq)
@@ -119,15 +120,17 @@ authParam = do
 
 -- Not part of RFC, extracted for readability
 -- 1*SP ( token68 / [ ( "," / auth-param ) *( OWS "," [ OWS auth-param ] ) ] )
+--
+-- Note: We don't want to consume commas at the end to avoid accidentally consuming comma between two challenges.
+--       The possible extra commas are being treated as "empty challenges" in `challenges` parser
 authParams :: ReadP AuthParams
 authParams = do
   _ <- munch1 (== ' ')
 
   let authToken = AuthParamsB64 <$> token68
   let authParams' = do
-        _   <- many $ (char ',' >> ows)
+        _   <- munch (\c -> isWhitespace c || c == ',')
         res <- sepBy authParam (ows >> char ',' >> (munch (\c -> isWhitespace c || c == ',')))
-        _   <- many $ (ows >> char ',')
         pure $ AuthParamsArr res
 
   authToken <|> authParams'
@@ -143,11 +146,11 @@ challenge = do
 challenges :: ReadP [Challenge]
 challenges = do
   -- The header can start with an "empty" challenge
-  _ <- many $ (char ',' >> ows)
+  _ <- munch (\c -> isWhitespace c || c == ',')
   let sepByAtLeastComma = (ows >> char ',' >> (munch (\c -> isWhitespace c || c == ',')))
   cs <- sepBy1 challenge sepByAtLeastComma
   -- It can also end with "empty" challenges
-  _ <- many $ (char ',' >> ows)
+  _ <- munch (\c -> isWhitespace c || c == ',')
   return cs
 
 newtype WWWAuthHeader = WWWAuthHeader [Challenge]
